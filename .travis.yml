@@ -10,6 +10,7 @@ env:
     - MIX_ENV=test VERBOSE_TEST=true
 
 before_script:
+  - mkdir -p priv/data/mnesia-test
   - mix deps.compile
 
 script:
