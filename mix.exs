@@ -20,7 +20,8 @@ defmodule Polarized.MixProject do
         "coveralls.html": :test,
         credo: :test,
         "test.watch": :test,
-        dialyzer: :test
+        dialyzer: :test,
+        seed: :test
       ],
       dialyzer: [
         ignore_warnings: ".dialyzer_ignore.exs",
