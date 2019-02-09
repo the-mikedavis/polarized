@@ -84,7 +84,7 @@ defmodule Polarized.MixProject do
 
   defp aliases do
     [
-      test: ["run priv/repo/seeds.exs", "test"],
+      seed: ["run priv/repo/seeds.exs"],
       bless: [&bless/1]
     ]
   end
