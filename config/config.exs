@@ -7,9 +7,6 @@
 # General application configuration
 use Mix.Config
 
-config :polarized,
-  ecto_repos: [Polarized.Repo]
-
 # Configures the endpoint
 config :polarized, PolarizedWeb.Endpoint,
   url: [host: "localhost"],
@@ -24,6 +21,15 @@ config :logger, :console,
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
+
+config :extwitter, :oauth,
+  consumer_key: "",
+  consumer_secret: "",
+  access_token: "",
+  access_token_secret: ""
+
+config :mnesia,
+  dir: 'priv/data/mnesia-#{Mix.env()}'
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

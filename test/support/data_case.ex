@@ -25,13 +25,7 @@ defmodule Polarized.DataCase do
     end
   end
 
-  setup tags do
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Polarized.Repo)
-
-    unless tags[:async] do
-      Ecto.Adapters.SQL.Sandbox.mode(Polarized.Repo, {:shared, self()})
-    end
-
+  setup _tags do
     :ok
   end
 

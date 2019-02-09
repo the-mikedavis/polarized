@@ -10,7 +10,22 @@ defmodule Polarized.MixProject do
       compilers: [:phoenix, :gettext] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps()
+      deps: deps(),
+      test_coverage: [tool: ExCoveralls],
+      preferred_cli_env: [
+        bless: :test,
+        coveralls: :test,
+        "coveralls.detail": :test,
+        "coveralls.post": :test,
+        "coveralls.html": :test,
+        credo: :test,
+        "test.watch": :test,
+        dialyzer: :test
+      ],
+      dialyzer: [
+        ignore_warnings: ".dialyzer_ignore.exs",
+        plt_add_apps: [:mnesia]
+      ]
     ]
   end
 
@@ -20,6 +35,7 @@ defmodule Polarized.MixProject do
   def application do
     [
       mod: {Polarized.Application, []},
+      included_applications: [:mnesia],
       extra_applications: [:logger, :runtime_tools]
     ]
   end
@@ -36,27 +52,53 @@ defmodule Polarized.MixProject do
       {:phoenix, "~> 1.4.0"},
       {:phoenix_pubsub, "~> 1.1"},
       {:phoenix_ecto, "~> 4.0"},
-      {:ecto_sql, "~> 3.0"},
-      {:postgrex, ">= 0.0.0"},
+      {:ecto, "~> 3.0"},
       {:phoenix_html, "~> 2.11"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
-      {:plug_cowboy, "~> 2.0"}
+      {:plug_cowboy, "~> 2.0"},
+
+      # encrypting passwords
+      {:comeonin, "~> 4.1"},
+      {:argon2_elixir, "~> 1.3"},
+
+      # twitter
+      {:oauther, "~> 1.1"},
+      {:extwitter, "~> 0.9.3"},
+
+      # test
+      {:credo, "~> 0.9.1", only: [:dev, :test], runtime: false},
+      {:excoveralls, "~> 0.7", only: :test},
+      {:dialyxir, "~> 1.0.0-rc.4", only: [:dev, :test], runtime: false},
+      {:private, "~> 0.1.1"},
+
+      # release
+      {:distillery, "~> 2.0", runtime: false}
     ]
   end
 
-  # Aliases are shortcuts or tasks specific to the current project.
-  # For example, to create, migrate and run the seeds file at once:
-  #
-  #     $ mix ecto.setup
-  #
-  # See the documentation for `Mix` for more info on aliases.
   defp aliases do
     [
-      "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
-      "ecto.reset": ["ecto.drop", "ecto.setup"],
-      test: ["ecto.create --quiet", "ecto.migrate", "test"]
+      test: ["run priv/repo/seeds.exs", "test"],
+      bless: [&bless/1]
     ]
+  end
+
+  defp bless(_) do
+    [
+      {"compile", ["--warnings-as-errors", "--force"]},
+      {"coveralls.html", []},
+      {"format", ["--check-formatted"]},
+      {"credo", []},
+      {"dialyzer", []}
+    ]
+    |> Enum.each(fn {task, args} ->
+      [:cyan, "Running #{task} with args #{inspect(args)}"]
+      |> IO.ANSI.format()
+      |> IO.puts()
+
+      Mix.Task.run(task, args)
+    end)
   end
 end
