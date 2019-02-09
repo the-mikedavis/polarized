@@ -59,6 +59,9 @@ defmodule Polarized.MixProject do
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
 
+      # Slime HTML
+      {:phoenix_slime, "~> 0.10"},
+
       # encrypting passwords
       {:comeonin, "~> 4.1"},
       {:argon2_elixir, "~> 1.3"},
@@ -72,6 +75,7 @@ defmodule Polarized.MixProject do
       {:excoveralls, "~> 0.7", only: :test},
       {:dialyxir, "~> 1.0.0-rc.4", only: [:dev, :test], runtime: false},
       {:private, "~> 0.1.1"},
+      {:mox, "~> 0.3"},
 
       # release
       {:distillery, "~> 2.0", runtime: false}

@@ -10,7 +10,8 @@ env:
     - MIX_ENV=test VERBOSE_TEST=true
 
 before_script:
-  - mix ecto.setup
+  - mkdir -p priv/data/mnesia-test
+  - mix deps.compile
 
 script:
   - mix compile --warnings-as-errors
