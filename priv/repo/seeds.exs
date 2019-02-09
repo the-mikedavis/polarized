@@ -1,9 +1,7 @@
 alias :mnesia, as: Mnesia
 require Logger
 
-Mnesia.create_schema([node()])
-
-:ok = Mnesia.start()
+Logger.info("Running seeds for #{Mix.env()}")
 
 tables = [
   {Admin, [:username, :password]}
@@ -37,6 +35,9 @@ Logger.info("Inserting default admin user...")
 
   {:ok, :inserted} ->
     Logger.info("Admin user added.")
+
+    # wait for changes to mnesia to propagate to disk
+    Process.sleep(2_000)
 
   {:error, reason} ->
     Logger.error("Insertion failed! #{inspect(reason)}")

@@ -14,6 +14,7 @@ before_script:
   - mix deps.compile
 
 script:
+  - mix seed
   - mix compile --warnings-as-errors
   - mix coveralls
   - mix format --check-formatted
