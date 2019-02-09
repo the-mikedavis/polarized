@@ -7,4 +7,4 @@ config :polarized, PolarizedWeb.Endpoint,
   server: false
 
 # Print only warnings and errors during test
-config :logger, level: :info
+config :logger, level: :warn

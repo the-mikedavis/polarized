@@ -27,6 +27,8 @@ defmodule Polarized.Repo do
 
     :ok = Mnesia.start()
 
+    :ok = Mnesia.wait_for_tables(:mnesia.system_info(:local_tables), 5_000)
+
     {:ok, args}
   end
 
@@ -39,6 +41,7 @@ defmodule Polarized.Repo do
          hashed_password <- Crypto.hashpwsalt(password),
          write_user <- fn -> Mnesia.write({Admin, username, hashed_password}) end,
          {:atomic, :ok} <- Mnesia.transaction(write_user) do
+      :ok = Mnesia.wait_for_tables([Admin], 5_000)
       {:ok, :inserted}
     else
       {:atomic, [{Admin, ^username, _password}]} -> {:ok, :unchanged}

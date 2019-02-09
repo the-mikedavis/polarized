@@ -13,4 +13,15 @@ defmodule Polarized.Helper do
       end
     end
   end
+
+  defmacro cast(function_name, implementation) do
+    quote do
+      def unquote(function_name)(arg),
+        do: GenServer.cast(__MODULE__, {unquote(function_name), arg})
+
+      def handle_cast({unquote(function_name), arg}, state) do
+        {:noreply, unquote(implementation).(arg), state}
+      end
+    end
+  end
 end
