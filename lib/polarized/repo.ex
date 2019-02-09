@@ -17,6 +17,10 @@ defmodule Polarized.Repo do
 
   @impl GenServer
   def init(args) do
+    :mnesia
+    |> Application.fetch_env!(:dir)
+    |> File.mkdir_p!()
+
     Mnesia.create_schema([node()])
 
     :ok = Mnesia.start()
