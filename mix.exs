@@ -75,7 +75,7 @@ defmodule Polarized.MixProject do
       {:excoveralls, "~> 0.7", only: :test},
       {:dialyxir, "~> 1.0.0-rc.4", only: [:dev, :test], runtime: false},
       {:private, "~> 0.1.1"},
-      {:mox, "~> 0.3"},
+      {:mox, "~> 0.5"},
 
       # release
       {:distillery, "~> 2.0", runtime: false}
