@@ -20,7 +20,8 @@ defmodule Polarized.MixProject do
         "coveralls.html": :test,
         credo: :test,
         "test.watch": :test,
-        dialyzer: :test
+        dialyzer: :test,
+        build: :prod
       ],
       dialyzer: [
         ignore_warnings: ".dialyzer_ignore.exs",
@@ -81,14 +82,16 @@ defmodule Polarized.MixProject do
       {:mox, "~> 0.5"},
 
       # release
-      {:distillery, "~> 2.0", runtime: false}
+      {:distillery, "~> 2.0", runtime: false},
+      {:duckduck, "~> 1.1"}
     ]
   end
 
   defp aliases do
     [
       seed: ["run priv/repo/seeds.exs"],
-      bless: [&bless/1]
+      bless: [&bless/1],
+      build: [&build/1]
     ]
   end
 
@@ -99,6 +102,31 @@ defmodule Polarized.MixProject do
       {"format", ["--check-formatted"]},
       {"credo", []},
       {"dialyzer", []}
+    ]
+    |> Enum.each(fn {task, args} ->
+      [:cyan, "Running #{task} with args #{inspect(args)}"]
+      |> IO.ANSI.format()
+      |> IO.puts()
+
+      Mix.Task.run(task, args)
+    end)
+  end
+
+  defp build(_) do
+    assets = Path.join(File.cwd!(), "assets")
+
+    [:cyan, "Building assets with webpack"]
+    |> IO.ANSI.format()
+    |> IO.puts()
+
+    [assets, "node_modules", ".bin", "webpack"]
+    |> Path.join()
+    |> System.cmd(["--production"], cd: assets)
+
+    [
+      {"phx.digest", []},
+      {"release", ["--env=prod"]},
+      {"goose", []}
     ]
     |> Enum.each(fn {task, args} ->
       [:cyan, "Running #{task} with args #{inspect(args)}"]

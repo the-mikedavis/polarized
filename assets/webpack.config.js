@@ -44,6 +44,15 @@ module.exports = (env, options) => ({
           'css-loader',
           'postcss-loader'
         ]
+      },
+      {
+        test: /\.elm$/,
+        exclude: [/elm-stuff/, /node_modules/],
+        loader: 'elm-webpack-loader',
+        options: {
+          debug: false,
+          cwd: __dirname
+        }
       }
     ]
   },

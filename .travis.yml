@@ -8,7 +8,6 @@ otp_release:
 env:
   global:
     - MIX_ENV=test VERBOSE_TEST=true
-    - secure: csqzTFmZFo5ITX70KHAsswUw6vQBaeXEwsKiN7s2s3R3jNNrUIxiaqhxS23dUoVvWHP1EevVCoAr9yxT0qeiEzLOU27/FXyqSCSiuZA76n3fpQv+0P1NSpVBGMl/noWaX3E7uJmEdRMR5NRn54GUa0dDVJwSMvYTTsoQsndIlQ8vpAdMGUn3kc7QEu4/a7BeED8+dsldmQILz2HoALcKzn7nM+2yjtzYaTdpndOqombP3CLqGJzn6INmfrL8mkmSrufWfy3n18YoKNMQVoe1ZMuFm8cjRTGn2yk+J9Pd+ouAKHOikyCKnv9nrUnxFu89s2d6T9z0+8PBkpP59R0KL6SoK5bXljib7V5VW5dcPCgoU73aIOF95JM3K5fhweJIr2eXWj0HJvow5qKXC+wgHDWEVVPwHzUsMINvmG4FUCzTWcSprgNoONBwdT3/Y7u9nIkwMTqD1MXap0tIRij7C+ogtzG5VQZR07sEnhVNAGoBMd8Ab72cs2+b7f4xfW8fnsAwm7FceCBtAKz0ZMSNPnPswAPFBAk5jNrPB+OgpaS1Lpon5wyR4k38MYE7acaD373WlZFRcT7fLg5Lsl55toZUyDTXytX3HYJFKc95LD9YgMYYFTmf82acBefayzAH2EnC2z1jvKnpuCwkeo+1GXneil4DJGF7gsQABU5TSnY=
 
 before_script:
   - mix deps.compile
@@ -23,28 +22,3 @@ script:
 branches:
   only:
     - master
-    - /^v[\d.]+/
-
-before_deploy:
-  - cd ./assets
-  - yarn install
-  - ./node_modules/.bin/webpack -p
-  - cd ..
-  - MIX_ENV=prod mix phx.digest
-  - MIX_ENV=prod mix release --env=prod
-
-deploy:
-  skip_cleanup: true
-  provider: releases
-  api_key:
-    secure: YHo5umQ1RQKDojTo84LO5FcBNl1IEKxqkbu7JgPfTKNK2xlqnOBWyJYzR2lTlQ6p5iik84BkhqpFMT2nRQ296dOHNZ9z07asuKFolioOg9oLY+vTp5c5MwFUA3QKMin5ktvI8ajP7aoNFevgGyd+Q4kFKK2lMkTDftOxmIDOlALoxuioX2foHzCHKM/5w3QQTpwNl72bBzGmmScqwkyu+sbrjd1hrQwoPNFIGd26k6uxOIDYuhnz63k9Iqe+h/HP/To07cyzXt9OBDJMHuB7g78ycCh50LvpOjo/oSIXp0d9I6JQXIEEQUQpuru1thTfQJ36Zhw7qzM41BkgNxs/spvt7kmWjPigHa5LvIZLtnZXxR8aCJu8dkuy8rrtllFWuw94EooUtk8/hPG+vt2k8MEBTPEyhUhcoMtmeX7/ozhn/iQpUhdQcvyzxVY1cBJOpu1IWUX7T413wY705hfmmZD3hZWoCRpHhCOx3eQ6T1QDVBNHY17AP/nYA2KGFKg0hT6FXW8tffZVGyFZozCu6Ik/b08HRupXA2jjrFgiMUl03NfakNfNvgMykHHBhxZI/XPvtsCncS6uvyngk7Fu0xC8Pv2bO6dfFqHT3/H16Lwl0+7IgxcBrn/PzV2+KnzcIwrvcE/Dm7XoDHU3QRtUWdRvtDM1lCTs2Cc+i1qrq/s=
-  file_glob: true
-  file: _build/prod/rel/polarized/releases/*/*.tar.gz
-  on:
-    tags: true
-
-after_deploy:
-  - curl
-    -X POST
-    -H 'Content-type:application/json'
-    -d "{\"text\":\"tar.gz built for $TRAVIS_REPO_SLUG - tag $(git tag -ln $TRAVIS_TAG)\"}" $SLACK_HOOK
