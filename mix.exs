@@ -70,6 +70,9 @@ defmodule Polarized.MixProject do
       {:oauther, "~> 1.1"},
       {:extwitter, "~> 0.9.3"},
 
+      # quantum jobs for refresh
+      {:quantum, "~> 2.3"},
+
       # test
       {:credo, "~> 0.9.1", only: [:dev, :test], runtime: false},
       {:excoveralls, "~> 0.7", only: :test},
