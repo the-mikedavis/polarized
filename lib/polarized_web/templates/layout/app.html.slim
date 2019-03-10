@@ -19,7 +19,7 @@ html lang="en"
         // .py-1?
         div.red-banner.bg-red.text-white.text-center POLARIZED.TV
 
-    main.container role="main"
+    main.py-10.container role="main"
       p.alert.alert-info role="alert" = get_flash(@conn, :info)
       p.alert.alert-danger role="alert" = get_flash(@conn, :error)
       = render(@view_module, @view_template, assigns)
@@ -28,8 +28,7 @@ html lang="en"
 
     nav.container role="navigation"
       ul
-        li
-          a href="https://hexdocs.pm/phoenix/overview.html" Credits
+        li = link("Credits", to: Routes.page_path(@conn, :credits))
         = if @conn.assigns[:current_user] do
           li = link("Admins", to: Routes.user_path(@conn, :index))
           li = link("Log out", to: Routes.session_path(@conn, :delete), method: "post")
