@@ -1,0 +1,14 @@
+{
+    "name": "Polarized.tv",
+    "short_name": "Polarized.tv",
+    "icons": [
+        {
+            "src": "/android-chrome-144x144.png",
+            "sizes": "144x144",
+            "type": "image/png"
+        }
+    ],
+    "theme_color": "#0058ca",
+    "background_color": "#0058ca",
+    "display": "standalone"
+}
