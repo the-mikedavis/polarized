@@ -3,22 +3,33 @@ html lang="en"
     meta charset="utf-8"
     meta http-equiv="X-UA-Compatible" content="IE=edge"
     meta name="viewport" content="width=device-width, initial-scale=1.0"
-    title Polarized · Phoenix Framework
+    title polarized.tv
     link rel="stylesheet" href='#{Routes.static_path(@conn, "/css/app.css")}'
 
   body
     header
-      section.container
-        nav role="navigation"
-          ul
-            li
-              a href="https://hexdocs.pm/phoenix/overview.html" Get Started
-
-        a.phx-logo href="http://phoenixframework.org/"
-          img src='#{Routes.static_path(@conn, "/images/phoenix.png")}' alt="Phoenix Framework Logo"
+      section.container.mt-2
+        div.flex.items-end.justify-between.mb-1.background-line
+          a.donkey.bg-white href="https://polarized.tv/"
+            img src='#{Routes.static_path(@conn, "/images/donkey.svg")}' alt="polarized.tv Logo"
+          a.polarized-logo.bg-white href="https://polarized.tv/"
+            img src='#{Routes.static_path(@conn, "/images/tv.svg")}' alt="polarized.tv Logo"
+          a.elephant.bg-white href="https://polarized.tv/"
+            img src='#{Routes.static_path(@conn, "/images/elephant.svg")}' alt="polarized.tv Logo"
+        // .py-1?
+        div.red-banner.bg-red.text-white.text-center POLARIZED.TV
 
     main.container role="main"
       p.alert.alert-info role="alert" = get_flash(@conn, :info)
       p.alert.alert-danger role="alert" = get_flash(@conn, :error)
       = render(@view_module, @view_template, assigns)
+
+    hr
+
+    nav role="navigation"
+      ul
+        li
+          a href="https://hexdocs.pm/phoenix/overview.html" Credits
+        li
+          a href="https://hexdocs.pm/phoenix/overview.html" Log in
     script type="text/javascript" src='#{Routes.static_path(@conn, "/js/app.js")}'

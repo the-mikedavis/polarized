@@ -1,0 +1,12 @@
+/* This file is for your main application css. */
+
+a
+  :text-decoration none
+
+$color_1: rgba(0,0,0,0)
+$color_2: rgba(0,0,0,1)
+$height: 65%
+$fatness: 2px
+
+.background-line
+  :background linear-gradient(180deg, $color_1 calc(#{$height} - #{$fatness}), $color_2 calc(#{$height}), $color_1 calc(#{$height} + #{$fatness}));

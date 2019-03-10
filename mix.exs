@@ -21,7 +21,8 @@ defmodule Polarized.MixProject do
         credo: :test,
         "test.watch": :test,
         dialyzer: :test,
-        build: :prod
+        build: :prod,
+        goose: :prod
       ],
       dialyzer: [
         ignore_warnings: ".dialyzer_ignore.exs",

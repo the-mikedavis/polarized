@@ -18,9 +18,4 @@ defmodule PolarizedWeb.Router do
 
     get "/", PageController, :index
   end
-
-  # Other scopes may use custom stacks.
-  # scope "/api", PolarizedWeb do
-  #   pipe_through :api
-  # end
 end
