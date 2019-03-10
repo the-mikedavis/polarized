@@ -1,6 +1,8 @@
 defmodule PolarizedWeb.Router do
   use PolarizedWeb, :router
 
+  alias PolarizedWeb.Plugs
+
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
@@ -9,13 +11,20 @@ defmodule PolarizedWeb.Router do
     plug :put_secure_browser_headers
   end
 
-  pipeline :api do
-    plug :accepts, ["json"]
+  pipeline :authenticate do
+    plug Plugs.Auth
   end
 
   scope "/", PolarizedWeb do
     pipe_through :browser
 
     get "/", PageController, :index
+    resources "/session", SessionController, only: [:new, :create, :delete]
+  end
+
+  scope "/admin", PolarizedWeb do
+    pipe_through [:browser, :authenticate]
+
+    resources "/user", UserController
   end
 end
