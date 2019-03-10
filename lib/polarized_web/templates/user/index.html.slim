@@ -1,15 +1,15 @@
-h1.text-blue-darker.my-8 Admins
+h1.text-red-dark.my-8 Admins
 
-div.bg-white.p-10.rounded.shadow-lg
+div.bg-white.p-10.rounded.shadow
   div.flex.w-full
     div class="w-3/5"
-      span.font-bold.text-blue-darker Username
+      span.font-bold.text-red-dark Username
 
   div.my-4.w-full
     = for user <- @user do
       div.flex
         div class="w-3/5 h-10" = user
-        div class="w-1/5 h-10" = link("Edit", to: Routes.user_path(@conn, :edit, user), class: "inline-block assign-baseline font-bold text-blue hover:text-blue-darker")
-        div class="w-1/5 h-10" = link("Delete", to: Routes.user_path(@conn, :delete, user), method: :delete, data: [confirm: "Are you sure?"], class: "inline-block assign-baseline font-bold text-blue hover:text-blue-darker")
+        div class="w-1/5 h-10" = link("Edit", to: Routes.user_path(@conn, :edit, user), class: "inline-block assign-baseline font-bold text-red-dark hover:text-red-darker")
+        div class="w-1/5 h-10" = link("Delete", to: Routes.user_path(@conn, :delete, user), method: :delete, data: [confirm: "Are you sure?"], class: "inline-block assign-baseline font-bold text-red-dark hover:text-red-darker")
 
-  = link("Make a New User", to: Routes.user_path(@conn, :new), class: "inline-block assign-baseline font-bold text-blue hover:text-blue-darker")
+  = link("Make a New User", to: Routes.user_path(@conn, :new), class: "inline-block assign-baseline font-bold text-red-dark hover:text-red-darker")

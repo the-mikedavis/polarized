@@ -26,10 +26,13 @@ html lang="en"
 
     hr
 
-    nav role="navigation"
+    nav.container role="navigation"
       ul
         li
           a href="https://hexdocs.pm/phoenix/overview.html" Credits
-        li
-          a href="https://hexdocs.pm/phoenix/overview.html" Log in
+        = if @conn.assigns[:current_user] do
+          li = link("Admins", to: Routes.user_path(@conn, :index))
+          li = link("Log out", to: Routes.session_path(@conn, :delete), method: "post")
+        - else
+          li = link("Log in", to: Routes.session_path(@conn, :new))
     script type="text/javascript" src='#{Routes.static_path(@conn, "/js/app.js")}'

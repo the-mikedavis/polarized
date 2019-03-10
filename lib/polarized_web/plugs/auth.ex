@@ -22,8 +22,8 @@ defmodule PolarizedWeb.Plugs.Auth do
           {:ok, Plug.Conn.t()} | {:error, atom(), Plug.Conn.t()}
   def login(conn, uname, given_pass) do
     case Accounts.authenticate(uname, given_pass) do
-      {:ok, user} ->
-        {:ok, login(conn, user)}
+      {:ok, %{username: uname}} ->
+        {:ok, login(conn, uname)}
 
       {:error, :unauthorized} ->
         {:error, :unauthorized, conn}
