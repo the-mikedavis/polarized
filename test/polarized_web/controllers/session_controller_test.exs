@@ -10,14 +10,18 @@ defmodule PolarizedWeb.SessionControllerTest do
     [username: "adminimum", password: "pleasechangethis"]
   end
 
-  test "logging in to adminimum brings you to user listing", %{conn: conn, username: uname, password: pass} do
+  test "logging in to adminimum brings you to user listing", %{
+    conn: conn,
+    username: uname,
+    password: pass
+  } do
     params = %{"session" => %{"username" => uname, "password" => pass}}
     conn = post(conn, Routes.session_path(conn, :create), params)
     assert html_response(conn, 302) =~ "/admin/user"
   end
 
   test "bad pass gives you an error", %{conn: conn, password: pass} do
-    params = %{"session" => %{"username" => "hi", "password" => pass}} 
+    params = %{"session" => %{"username" => "hi", "password" => pass}}
     conn = post(conn, Routes.session_path(conn, :create), params)
     assert html_response(conn, 200) =~ "Invalid username/password combination"
   end

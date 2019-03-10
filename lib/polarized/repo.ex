@@ -61,7 +61,9 @@ defmodule Polarized.Repo do
     case :mnesia.transaction(remove_user) do
       {:atomic, :ok} ->
         :ok = :mnesia.wait_for_tables([Admin], 5_000)
-      {:aborted, reason} -> {:error, reason}
+
+      {:aborted, reason} ->
+        {:error, reason}
     end
   end
 
@@ -88,7 +90,7 @@ defmodule Polarized.Repo do
 
   # returns an mnesia transaction function
   # higher order
-  @spec upsert_user_transaction(String.t(), String.t()) :: {:atomic, :ok} | {:aborted, any()}
+  @spec upsert_user_transaction(String.t(), String.t()) :: (() -> :ok | any())
   defp upsert_user_transaction(user, hash) do
     fn ->
       with [{Admin, ^user, _other_hash}] <- :mnesia.read({Admin, user}),
@@ -104,6 +106,7 @@ defmodule Polarized.Repo do
   @spec list_users_impl() :: {:ok, [String.t()]} | {:error, any()}
   defp list_users_impl do
     :ok = :mnesia.wait_for_tables([Admin], 5_000)
+
     case :mnesia.transaction(fn -> :mnesia.all_keys(Admin) end) do
       {:atomic, users} -> {:ok, users}
       {:aborted, reason} -> {:error, reason}

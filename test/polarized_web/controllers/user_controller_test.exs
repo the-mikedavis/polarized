@@ -15,8 +15,9 @@ defmodule PolarizedWeb.UserControllerTest do
   describe "logged in access" do
     setup %{conn: conn} do
       username = "another_user"
+
       [
-        username: username, 
+        username: username,
         password: "password",
         conn: init_test_session(conn, %{user_id: "adminimum"})
       ]
