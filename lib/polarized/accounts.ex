@@ -12,7 +12,11 @@ defmodule Polarized.Accounts do
   def change_user(%User{} = user \\ %User{}), do: User.changeset(user, %{})
 
   @spec list_users() :: [String.t()]
-  def list_users, do: Repo.list_users()
+  def list_users do
+    {:ok, users} = Repo.list_users()
+
+    users
+  end
 
   @spec create_user(%{username: String.t(), password: String.t()}) ::
           {:ok, String.t()} | {:error, Changeset.t() | any()}
@@ -24,7 +28,7 @@ defmodule Polarized.Accounts do
       {:ok, user}
     else
       {:error, :exists} ->
-        Changeset.add_error(changeset, :username, "User already exists")
+        {:error, Changeset.add_error(changeset, :username, "User already exists")}
 
       e ->
         e
@@ -57,7 +61,7 @@ defmodule Polarized.Accounts do
 
   @spec authenticate(String.t(), String.t()) :: {:ok, %User{}} | {:error, atom()}
   def authenticate(username, given_password) do
-    user = Repo.get_user(username)
+    {:ok, user} = Repo.get_user(username)
 
     cond do
       user && Crypto.checkpw(given_password, user.hashed_password) ->

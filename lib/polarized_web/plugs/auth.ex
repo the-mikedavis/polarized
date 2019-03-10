@@ -36,7 +36,7 @@ defmodule PolarizedWeb.Plugs.Auth do
   def login(conn, user) do
     conn
     |> assign(:current_user, user)
-    |> put_session(:user_id, user.id)
+    |> put_session(:user_id, user)
     |> configure_session(renew: true)
   end
 

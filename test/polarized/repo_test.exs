@@ -19,8 +19,14 @@ defmodule Polarized.RepoTest do
   """ do
     user = %{username: "another user", password: "password"}
 
-    assert {:ok, :inserted} = Repo.ensure_user_inserted(user)
+    resp = Repo.ensure_user_inserted(user)
 
-    assert :ok = Repo.remove_user(user)
+    assert :ok = Repo.remove_user(user.username)
+
+    {:ok, users} = Repo.list_users()
+
+    assert user.username not in users
+
+    assert resp == {:ok, :inserted}
   end
 end

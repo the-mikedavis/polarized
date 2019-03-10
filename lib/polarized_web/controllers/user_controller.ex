@@ -3,6 +3,7 @@ defmodule PolarizedWeb.UserController do
   use Private
 
   alias Polarized.{Accounts, Accounts.User}
+  alias PolarizedWeb.Plugs.Auth
 
   plug(:is_user when action in [:edit, :update, :delete])
 
@@ -20,13 +21,14 @@ defmodule PolarizedWeb.UserController do
     case Accounts.create_user(user_params) do
       {:ok, user} ->
         conn
-        |> put_session(:user_id, user)
-        |> assign(:current_user, user)
+        |> Auth.login(user)
         |> put_flash(:info, "Success. You're now logged in as #{user}")
         |> redirect(to: Routes.page_path(conn, :index))
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        render(conn, "new.html", changeset: changeset)
+        conn
+        |> put_flash(:error, "User could not be created. Fix the form errors and try again")
+        |> render("new.html", changeset: changeset)
     end
   end
 
@@ -64,7 +66,7 @@ defmodule PolarizedWeb.UserController do
     # access.
     @spec is_user(Plug.Conn.t(), Keyword.t()) :: Plug.Conn.t()
     defp is_user(conn, _opts) do
-      id = String.to_integer(conn.params["id"])
+      id = conn.params["id"]
 
       # we can use the dot notation because this is run after the authentication
       # plug

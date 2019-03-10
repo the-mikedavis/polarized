@@ -16,6 +16,6 @@ defmodule Polarized.Accounts.User do
     user
     |> cast(params, [:username, :password])
     |> validate_required([:username, :password])
-    |> validate_length(:username, 4..18)
+    |> validate_length(:username, min: 4, max: 18)
   end
 end

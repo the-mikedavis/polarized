@@ -9,6 +9,7 @@ defmodule PolarizedWeb.Router do
     plug :fetch_flash
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug Plugs.User
   end
 
   pipeline :authenticate do
@@ -19,7 +20,8 @@ defmodule PolarizedWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :index
-    resources "/session", SessionController, only: [:new, :create, :delete]
+    resources "/session", SessionController, only: [:new, :create]
+    post "/session/delete", SessionController, :delete
   end
 
   scope "/admin", PolarizedWeb do
