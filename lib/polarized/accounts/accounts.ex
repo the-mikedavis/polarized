@@ -19,7 +19,7 @@ defmodule Polarized.Accounts do
   end
 
   @spec create_user(%{username: String.t(), password: String.t()}) ::
-          {:ok, String.t()} | {:error, Changeset.t() | any()}
+          {:ok, String.t()} | {:error, Changeset.t()}
   def create_user(user_map) do
     changeset = User.changeset(%User{}, user_map)
 
@@ -29,9 +29,6 @@ defmodule Polarized.Accounts do
     else
       {:error, :exists} ->
         {:error, Changeset.add_error(changeset, :username, "User already exists")}
-
-      e ->
-        e
     end
   end
 
@@ -48,11 +45,10 @@ defmodule Polarized.Accounts do
     end
   end
 
-  @spec delete_user(String.t()) :: {:ok, String.t()} | {:error, any()}
+  @spec delete_user(String.t()) :: {:ok, String.t()}
   def delete_user(uname) do
     case Repo.remove_user(uname) do
       :ok -> {:ok, uname}
-      e -> e
     end
   end
 
