@@ -17,11 +17,15 @@ defmodule Polarized.Repo do
   call(:get_user, &get_user_impl/1)
   call(:insert_handle, &insert_handle_impl/1)
   call(:remove_handle, &remove_handle_impl/1)
+  call(:follow_handle, &follow_handle_impl/1)
+  call(:unfollow_handle, &unfollow_handle_impl/1)
 
   def list_users, do: GenServer.call(__MODULE__, :list_users)
   def list_handles, do: GenServer.call(__MODULE__, :list_handles)
+  def list_follows, do: GenServer.call(__MODULE__, :list_follows)
   def handle_call(:list_users, _from, state), do: {:reply, list_users_impl(), state}
   def handle_call(:list_handles, _from, state), do: {:reply, list_handles_impl(), state}
+  def handle_call(:list_follows, _from, state), do: {:reply, list_follows_impl(), state}
 
   ## Server implementation
 
@@ -144,7 +148,7 @@ defmodule Polarized.Repo do
     end
   end
 
-  defp into_handle({Handle, name, lr}), do: %Handle{name: name, right_wing: lr}
+  defp into_handle({_handle, name, lr}), do: %Handle{name: name, right_wing: lr}
 
   @spec insert_handle_impl(%Handle{}) :: :ok | {:error, :full | any()}
   def insert_handle_impl(%Handle{} = handle) do
@@ -172,6 +176,40 @@ defmodule Polarized.Repo do
   def remove_handle_impl(name) do
     case :mnesia.transaction(fn -> :mnesia.delete({Handle, name}) end) do
       {:atomic, :ok} -> {:ok, name}
+      {:aborted, reason} -> {:error, reason}
+    end
+  end
+
+  @spec list_follows_impl() :: {:ok, [%Handle{}]} | {:error, any()}
+  defp list_follows_impl do
+    case :mnesia.transaction(fn -> :mnesia.select(Follow, [{:_, [], [:"$_"]}]) end) do
+      {:atomic, follows} -> {:ok, Enum.map(follows, &into_handle/1)}
+      {:aborted, reason} -> {:error, reason}
+    end
+  end
+
+  @spec follow_handle_impl(%Handle{}) :: :ok | {:error, any()}
+  defp follow_handle_impl(name) do
+    follow = fn ->
+      with [{Handle, ^name, right_wing} | _] <- :mnesia.read({Handle, name}),
+           :ok <- :mnesia.delete({Handle, name}) do
+        :mnesia.write({Follow, name, right_wing})
+      else
+        [] -> {:error, :does_not_exist}
+      end
+    end
+
+    case :mnesia.transaction(follow) do
+      {:atomic, :ok} -> :ok
+      {:atomic, {:error, :does_not_exist}} -> {:error, :does_not_exist}
+      {:aborted, reason} -> {:error, reason}
+    end
+  end
+
+  @spec unfollow_handle_impl(String.t()) :: :ok | {:error, any()}
+  defp unfollow_handle_impl(name) do
+    case :mnesia.transaction(fn -> :mnesia.delete({Follow, name}) end) do
+      {:atomic, :ok} -> :ok
       {:aborted, reason} -> {:error, reason}
     end
   end

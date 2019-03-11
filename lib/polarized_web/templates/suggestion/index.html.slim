@@ -1,3 +1,18 @@
+h1.text-red-dark.my-4 Follows
+
+div.bg-white.p-10.shadow
+  div.flex.w-full
+    div class="w-1/3 text-sm font-bold" Name
+    div class="w-1/3 text-sm font-bold" Wingedness
+
+  div.my-4.w-full
+    = for follow <- @follows do
+      div.flex
+        div class="w-1/3 h-10" = follow.name
+        div class="w-1/3 h-10" = wingedness(follow)
+        div class="w-1/6 h-10"
+        div class="w-1/6 h-10" = link("Delete", to: Routes.suggestion_path(@conn, :delete, follow), method: "delete", confirm: "Are you sure?")
+
 h1.text-red-dark.my-4 Suggestions
 
 div.bg-white.p-10.shadow

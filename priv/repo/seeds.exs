@@ -5,7 +5,8 @@ Logger.info("Running seeds for #{Mix.env()}")
 
 tables = [
   {Admin, [:username, :password]},
-  {Polarized.Content.Handle, [:name, :right_wing]}
+  {Polarized.Content.Handle, [:name, :right_wing]},
+  {Follow, [:name, :right_wing]}
 ]
 
 # sets up the tables necessary to operate the app
