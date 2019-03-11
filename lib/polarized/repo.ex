@@ -3,6 +3,7 @@ defmodule Polarized.Repo do
   import Polarized.Helper, only: [call: 2]
 
   alias Comeonin.Argon2, as: Crypto
+  alias Polarized.Content.Handle
 
   @moduledoc "The persistence repository."
 
@@ -14,9 +15,13 @@ defmodule Polarized.Repo do
   call(:upsert_user, &upsert_user_impl/1)
   call(:user_exists?, &user_exists_impl/1)
   call(:get_user, &get_user_impl/1)
+  call(:insert_handle, &insert_handle_impl/1)
+  call(:remove_handle, &remove_handle_impl/1)
 
   def list_users, do: GenServer.call(__MODULE__, :list_users)
+  def list_handles, do: GenServer.call(__MODULE__, :list_handles)
   def handle_call(:list_users, _from, state), do: {:reply, list_users_impl(), state}
+  def handle_call(:list_handles, _from, state), do: {:reply, list_handles_impl(), state}
 
   ## Server implementation
 
@@ -98,7 +103,6 @@ defmodule Polarized.Repo do
         :mnesia.write({Admin, user, hash})
       else
         [] -> :mnesia.write({Admin, user, hash})
-        e -> e
       end
     end
   end
@@ -124,10 +128,50 @@ defmodule Polarized.Repo do
 
   @spec get_user_impl(String.t()) ::
           {:ok, %{username: String.t(), hashed_password: String.t()}} | {:error, any()}
-  def get_user_impl(uname) do
+  defp get_user_impl(uname) do
     case :mnesia.transaction(fn -> :mnesia.read({Admin, uname}) end) do
       {:atomic, [{Admin, ^uname, hash}]} -> {:ok, %{username: uname, hashed_password: hash}}
       {:atomic, _} -> {:ok, nil}
+      {:aborted, reason} -> {:error, reason}
+    end
+  end
+
+  @spec list_handles_impl() :: {:ok, [%Handle{}]} | {:error, any()}
+  defp list_handles_impl do
+    case :mnesia.transaction(fn -> :mnesia.select(Handle, [{:_, [], [:"$_"]}]) end) do
+      {:atomic, handles} -> {:ok, Enum.map(handles, &into_handle/1)}
+      {:aborted, reason} -> {:error, reason}
+    end
+  end
+
+  defp into_handle({Handle, name, lr}), do: %Handle{name: name, right_wing: lr}
+
+  @spec insert_handle_impl(%Handle{}) :: :ok | {:error, :full | any()}
+  def insert_handle_impl(%Handle{} = handle) do
+    case :mnesia.transaction(insert_handle_transaction(handle)) do
+      {:atomic, :ok} -> :ok
+      {:atomic, {:error, :full}} -> {:error, :full}
+      {:aborted, reason} -> {:error, reason}
+    end
+  end
+
+  @max_handles 100
+
+  defp insert_handle_transaction(handle) do
+    fn ->
+      with handles when length(handles) < @max_handles <- :mnesia.all_keys(Handle),
+           :ok <- :mnesia.write({Handle, handle.name, handle.right_wing}) do
+        :ok
+      else
+        handles when is_list(handles) -> {:error, :full}
+      end
+    end
+  end
+
+  @spec remove_handle_impl(String.t()) :: {:ok, String.t()} | {:error, any()}
+  def remove_handle_impl(name) do
+    case :mnesia.transaction(fn -> :mnesia.delete({Handle, name}) end) do
+      {:atomic, :ok} -> {:ok, name}
       {:aborted, reason} -> {:error, reason}
     end
   end

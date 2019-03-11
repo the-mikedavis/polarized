@@ -20,6 +20,7 @@ defmodule PolarizedWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :index
+    post "/", PageController, :create
     get "/credits", PageController, :credits
     resources "/session", SessionController, only: [:new, :create]
     post "/session/delete", SessionController, :delete

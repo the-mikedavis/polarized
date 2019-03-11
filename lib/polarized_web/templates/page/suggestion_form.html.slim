@@ -1,0 +1,21 @@
+hr
+div.w-full.mt-6
+  p.w-full.text-center Suggest a user
+  = if @changeset.action do
+    div.alert.alert-danger
+      p Oops, something went wrong! Please check the errors below.
+
+  = form_for @changeset, Routes.page_path(@conn, :create), [class: "flex w-full bg-white px-8 pt-6 pb-8 mb-4"], fn f ->
+    div class="w-1/2"
+      = label(f, :name, class: "inline text-black text-sm font-bold mr-2")
+      = text_input(f, :name, class: "inline appearance-none border py-2 px-3 leading-tight focus:outline-none focus:shadow-outline")
+      = error_tag(f, :name)
+
+    div class="w-1/3"
+      = label(f, :right_wing, "This user leans", class: "inline text-black text-sm")
+      = select(f, :right_wing, ~w(left right), class: "inline")
+      = error_tag(f, :right_wing)
+
+    div class="w-1/6"
+    = submit("Submit", class: "bg-blue text-white font-bold py-2 px-4 focus:outline-none focus:shadow-outline")
+hr
