@@ -19,7 +19,7 @@ defmodule PolarizedWeb.PageController do
     |> case do
       {:ok, handle} ->
         conn
-        |> put_flash(:info, "Suggessfully suggested #{handle.name}")
+        |> put_flash(:info, "You just suggested #{handle.name}")
         |> redirect(to: Routes.page_path(conn, :index))
 
       {:error, :full} ->

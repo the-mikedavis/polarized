@@ -19,12 +19,10 @@ html lang="en"
     header
       section.container.mt-2
         div.flex.items-end.justify-between.mb-1.background-line
-          a.donkey.bg-white href="https://polarized.tv/"
-            img src='#{Routes.static_path(@conn, "/images/donkey.svg")}' alt="polarized.tv Logo"
-          a.polarized-logo.bg-white href="https://polarized.tv/"
+          img.donkey.bg-white src='#{Routes.static_path(@conn, "/images/donkey.svg")}'
+          a.polarized-logo.bg-white href='#{Routes.page_path(@conn, :index)}'
             img src='#{Routes.static_path(@conn, "/images/tv.svg")}' alt="polarized.tv Logo"
-          a.elephant.bg-white href="https://polarized.tv/"
-            img src='#{Routes.static_path(@conn, "/images/elephant.svg")}' alt="polarized.tv Logo"
+          img.elephant.bg-white src='#{Routes.static_path(@conn, "/images/elephant.svg")}'
         // .py-1?
         div.red-banner.bg-red.text-white.text-center POLARIZED.TV
 
@@ -38,6 +36,7 @@ html lang="en"
         li = link("Credits", to: Routes.page_path(@conn, :credits))
         = if @conn.assigns[:current_user] do
           li = link("Admins", to: Routes.user_path(@conn, :index))
+          li = link("Suggestions", to: Routes.suggestion_path(@conn, :index))
           li = link("Log out", to: Routes.session_path(@conn, :delete), method: "post")
         - else
           li = link("Log in", to: Routes.session_path(@conn, :new))

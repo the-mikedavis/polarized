@@ -30,5 +30,8 @@ defmodule PolarizedWeb.Router do
     pipe_through [:browser, :authenticate]
 
     resources "/user", UserController
+    get "/suggestions", SuggestionController, :index
+    put "/suggestions/approve/:name", SuggestionController, :approve
+    put "/suggestions/deny/:name", SuggestionController, :deny
   end
 end
