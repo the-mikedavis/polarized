@@ -11,12 +11,16 @@ defmodule Polarized.Content.Server do
   def start_link(_opts \\ []), do: GenServer.start_link(__MODULE__, nil, name: __MODULE__)
 
   def init(nil) do
-    {:ok, fetch_state()}
+    Process.send_after(self(), :refresh, 200)
+
+    {:ok, []}
   end
 
   def refresh, do: GenServer.cast(__MODULE__, :refresh)
 
   def handle_cast(:refresh, _state), do: {:noreply, fetch_state()}
+
+  def handle_info(:refresh, _state), do: {:noreply, fetch_state()}
 
   private do
     alias Polarized.Repo
