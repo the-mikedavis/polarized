@@ -8,8 +8,25 @@ $color_2: rgba(0,0,0,1)
 $height: 65%
 $fatness: 2px
 
-.background-line
-  :background linear-gradient(180deg, $color_1 calc(#{$height} - #{$fatness}), $color_2 calc(#{$height}), $color_1 calc(#{$height} + #{$fatness}));
-
 hr
   :border 1px solid #000
+
+a#esc-button
+  :width 150px
+  :height 50px
+  :margin-left auto
+  :margin-right auto
+  :text-align center
+  :vertical-align middle
+  :background #F7A806
+  &:hover
+    :background #e29a04
+  span
+    :position relative
+    :top -10px
+    :margin-right 5px
+  img
+    :width 50px
+
+.background-line
+  :background linear-gradient(180deg, $color_1 calc(#{$height} - #{$fatness}), $color_2 calc(#{$height}), $color_1 calc(#{$height} + #{$fatness}));

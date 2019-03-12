@@ -1,1 +1,8 @@
+// the Player.elm widget
+
 = render("suggestion_form.html", assigns)
+
+div.w-full.items-center
+  a#esc-button class="mt-4 text-white pt-2 px-4 block shadow" href="https://twitter.com/hashtag/catvideos?lang=en"
+    span Escape
+    img.escape src='#{Routes.static_path(@conn, "/images/escape.svg")}'
