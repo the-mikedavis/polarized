@@ -1,6 +1,9 @@
 alias :mnesia, as: Mnesia
 require Logger
 
+Application.ensure_started(:mnesia)
+Supervisor.start_link([Polarized.Repo], strategy: :one_for_one)
+
 Logger.info("Running seeds for #{Mix.env()}")
 
 tables = [

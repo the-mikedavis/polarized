@@ -90,7 +90,7 @@ defmodule Polarized.MixProject do
 
   defp aliases do
     [
-      seed: ["run priv/repo/seeds.exs"],
+      seed: ["run priv/repo/seeds.exs --no-start"],
       bless: [&bless/1],
       build: [&build/1]
     ]
