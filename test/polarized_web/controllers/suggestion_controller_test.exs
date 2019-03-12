@@ -4,11 +4,7 @@ defmodule PolarizedWeb.SuggestionControllerTest do
   alias Polarized.Content.Handle
   alias Polarized.Repo
 
-  import Plug.Test, only: [init_test_session: 2]
-
-  setup %{conn: conn} do
-    [conn: init_test_session(conn, user_id: "adminimum")]
-  end
+  setup :as_admin
 
   describe "suggestions" do
     setup do

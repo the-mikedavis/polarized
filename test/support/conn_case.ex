@@ -20,6 +20,7 @@ defmodule PolarizedWeb.ConnCase do
       # Import conveniences for testing with connections
       use Phoenix.ConnTest
       alias PolarizedWeb.Router.Helpers, as: Routes
+      import PolarizedWeb.ConnCase
 
       # The default endpoint for testing
       @endpoint PolarizedWeb.Endpoint
@@ -27,8 +28,21 @@ defmodule PolarizedWeb.ConnCase do
   end
 
   setup _tags do
-    # TODO refresh to do mnesia stuff
-
     {:ok, conn: Phoenix.ConnTest.build_conn()}
+  end
+
+  import Plug.Test, only: [init_test_session: 2]
+  alias Polarized.Repo
+
+  def as_admin(context) do
+    username = Map.get(context, :username, "a user")
+    password = Map.get(context, :password, "password")
+    conn = Map.get(context, :conn, Phoenix.ConnTest.build_conn())
+
+    {:ok, _} = Repo.insert_user(%{username: username, password: password})
+
+    on_exit(fn -> :ok = Repo.remove_user(username) end)
+
+    [username: username, password: password, conn: init_test_session(conn, user_id: username)]
   end
 end
