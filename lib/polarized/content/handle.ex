@@ -1,6 +1,8 @@
 defmodule Polarized.Content.Handle do
   @moduledoc "A twitter handle, leans left or right"
 
+  @type t :: %__MODULE__{}
+
   use Ecto.Schema
 
   embedded_schema do

@@ -29,9 +29,7 @@ defmodule Polarized.Content.Server do
     defp fetch_state do
       {:ok, follows} = Repo.list_follows()
 
-      follows
-      |> Enum.map(& &1.name)
-      |> Embed.fetch()
+      Embed.fetch(follows)
     end
   end
 end
