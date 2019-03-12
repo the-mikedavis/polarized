@@ -4,19 +4,18 @@ defmodule Polarized.Content.ServerTest do
   alias Polarized.Repo
   alias Polarized.Content.{Handle, Server}
 
-  @twitter Application.fetch_env!(:polarized, :twitter_client)
   @http Application.fetch_env!(:polarized, :http_client)
+  @twitter Application.fetch_env!(:polarized, :twitter_client)
 
   import Mox
 
   setup :verify_on_exit!
 
   setup do
-    handle = %Handle{name: "FoxNewsSunday", right_wing: true}
+    name = "FoxNewsSunday"
+    handle = %Handle{name: name, right_wing: true}
     :ok = Repo.insert_handle(handle)
     :ok = Repo.follow_handle(handle.name)
-
-    on_exit(fn -> :ok = Repo.unfollow_handle(handle.name) end)
 
     {tweets, _} =
       [File.cwd!(), "data", "foxnewssunday.exs"]
@@ -28,6 +27,11 @@ defmodule Polarized.Content.ServerTest do
       |> Path.join()
       |> Code.eval_file()
 
+    on_exit(fn ->
+      :ok = Repo.unfollow_handle(handle.name)
+      Server.refresh()
+    end)
+
     [
       handle: handle,
       tweets: tweets,
@@ -35,16 +39,15 @@ defmodule Polarized.Content.ServerTest do
     ]
   end
 
-  # YARD this makes me sad...
-  test "mega test muahahahaha", %{handle: %{name: name}} = c do
+  def get_req(url, http_reqs), do: Enum.find(http_reqs, &(&1.request.url == url))
+
+  test "megatest muahahaha", c do
     @twitter
-    |> expect(:user_timeline, fn [screen_name: ^name] -> c.tweets end)
+    |> expect(:user_timeline, fn [screen_name: _] -> c.tweets end)
     |> allow(self(), Server)
 
     @http
     |> expect(:get, 11, fn url ->
-      assert url =~ "publish.twitter.com/oembed"
-
       {:ok, get_req(url, c.http_reqs)}
     end)
     |> allow(self(), Server)
@@ -52,6 +55,10 @@ defmodule Polarized.Content.ServerTest do
     Server.refresh()
 
     Process.sleep(10)
+
+    assert ["FNS", "Trade"] = Server.list_hashtags()
+
+    assert [_embed] = Server.request(:_, ["Trade"])
 
     embeds = :sys.get_state(Server)
 
@@ -76,11 +83,7 @@ defmodule Polarized.Content.ServerTest do
     for embed <- Server.request(:_, ["FNS"]) do
       assert "FNS" in embed.hashtags
     end
-
-    assert [_embed] = Server.request(:_, ["Trade"])
   end
-
-  defp get_req(url, http_reqs), do: Enum.find(http_reqs, &(&1.request.url == url))
 
   test "bad username gives empty list and no error" do
     @twitter

@@ -14,6 +14,9 @@ defmodule Polarized.Content.Server do
   def request(right_wing?, hashtags),
     do: GenServer.call(__MODULE__, {:request, right_wing?, hashtags})
 
+  @spec list_hashtags() :: [String.t()]
+  def list_hashtags, do: GenServer.call(__MODULE__, :hashtags)
+
   ## private-ish stuff
 
   def start_link(_opts \\ []), do: GenServer.start_link(__MODULE__, nil, name: __MODULE__)
@@ -31,6 +34,15 @@ defmodule Polarized.Content.Server do
       |> Enum.filter(&match_hashtags(hashtags, &1))
 
     {:reply, embeds, state}
+  end
+
+  def handle_call(:hashtags, _from, state) do
+    hashtags =
+      state
+      |> Enum.reduce([], fn embed, acc -> embed.hashtags ++ acc end)
+      |> Enum.uniq()
+
+    {:reply, hashtags, state}
   end
 
   @impl GenServer

@@ -43,6 +43,6 @@ defmodule PolarizedWeb.ConnCase do
 
     on_exit(fn -> :ok = Repo.remove_user(username) end)
 
-    [username: username, password: password, conn: init_test_session(conn, user_id: username)]
+    [username: username, password: password, conn: init_test_session(conn, %{user_id: username})]
   end
 end
