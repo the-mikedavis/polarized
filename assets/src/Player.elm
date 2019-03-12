@@ -61,6 +61,8 @@ type Msg
     = PhoenixMsg (Phoenix.Socket.Msg Msg)
     | JoinChannel
     | PopulateHashtags Encode.Value
+    | TouchLeft
+    | TouchRight
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -97,6 +99,28 @@ update msg model =
                     Err error ->
                         ( model, Cmd.none )
 
+        TouchLeft ->
+            let
+                newWingedness =
+                    case model.wingedness of
+                        BothWing -> RightWing
+                        RightWing -> BothWing
+                        LeftWing -> NoWing
+                        NoWing -> LeftWing
+            in
+                ( { model | wingedness = newWingedness }, Cmd.none )
+
+        TouchRight ->
+            let
+                newWingedness =
+                    case model.wingedness of
+                        BothWing -> LeftWing
+                        LeftWing -> BothWing
+                        RightWing -> NoWing
+                        NoWing -> RightWing
+            in
+                ( { model | wingedness = newWingedness }, Cmd.none )
+
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
@@ -115,9 +139,153 @@ onKeyDown tagger =
 
 ---- VIEW ----
 
+drawJumbotron : Model -> Html Msg
+drawJumbotron model =
+    let
+        internals =
+            case model.wingedness of
+                NoWing ->
+                    [ p []
+                        [ text "Polarized TV generates daily broadcasts from"
+                        ]
+                    , p []
+                        [ text "video content collected from"
+                        ]
+                    , p []
+                        [ text "right or left leaning Twitter users"
+                        ]
+                    ]
+                _ ->
+                    [ ]
+    in
+        div [ id "jumbotron"
+            , class "text-center"
+            ]
+            internals
+
+
+drawLeft : Model -> Html Msg
+drawLeft model =
+    let
+        txt =
+            case model.wingedness of
+                LeftWing ->
+                    "Watching"
+                BothWing ->
+                    "Watching"
+                _ ->
+                    "Watch"
+        classes =
+            case model.wingedness of
+                LeftWing ->
+                    [ ( "bg-red", True )
+                    , ( "raised", True )
+                    ]
+                BothWing ->
+                    [ ( "bg-red", True )
+                    , ( "raised", True )
+                    ]
+                _ ->
+                    [ ( "bg-blue", True )
+                    ]
+    in
+        div [ id "left"
+            , onClick TouchLeft
+            , classList ( classes ++ [ ( "text-white", True )
+                                     , ( "py-8", True )
+                                     , ( "px-6", True )
+                                     , ( "text-center", True )
+                                     ] )
+            ]
+            [ text (txt ++ " the ")
+            , span [ class "bigger uppercase"
+                   ]
+                   [ text "LEFT"
+                   ]
+            ]
+
+
+drawRight : Model -> Html Msg
+drawRight model =
+    let
+        txt =
+            case model.wingedness of
+                RightWing ->
+                    "Watching"
+                BothWing ->
+                    "Watching"
+                _ ->
+                    "Watch"
+        classes =
+            case model.wingedness of
+                RightWing ->
+                    [ ( "bg-red", True )
+                    , ( "raised", True )
+                    ]
+                BothWing ->
+                    [ ( "bg-red", True )
+                    , ( "raised", True )
+                    ]
+                _ ->
+                    [ ( "bg-blue", True )
+                    ]
+    in
+        div [ id "right"
+            , onClick TouchRight
+            , classList ( classes ++ [ ( "text-white", True )
+                                     , ( "py-8", True )
+                                     , ( "px-6", True )
+                                     , ( "text-center", True )
+                                     ] )
+            ]
+            [ text (txt ++ " the ")
+            , span [ class "bigger uppercase"
+                   ]
+                   [ text "RIGHT"
+                   ]
+            ]
+
+
+drawLeftRight : Model -> Html Msg
+drawLeftRight model =
+    let
+        layout =
+            case model.wingedness of
+                BothWing ->
+                    [ drawLeft model
+                    , span [ id "and-separator"
+                           , class "py-4"
+                           ]
+                           [ text "&" ]
+                    , drawRight model
+                    ]
+
+                _ ->
+                    [ drawLeft model
+                    , drawRight model
+                    ]
+    in
+        div [ id "left-right"
+            , class "my-20 flex justify-around items-start"
+            ]
+            layout
+
+
+drawControlPanel : Model -> Html Msg
+drawControlPanel model =
+    div [ id "control-panel"
+        ]
+        []
+
+
 view : Model -> Html Msg
 view model =
-    div [] []
+    div [ id "player-container"
+        ]
+        [ drawJumbotron model
+        , drawLeftRight model
+        , drawControlPanel model
+        ]
 
 
 ---- PROGRAM ----

@@ -50,8 +50,9 @@ module.exports = (env, options) => ({
         exclude: [/elm-stuff/, /node_modules/],
         loader: 'elm-webpack-loader',
         options: {
-          debug: false,
-          cwd: __dirname
+          //debug: false,
+          debug: true
+          // cwd: __dirname
         }
       }
     ]
