@@ -19,11 +19,7 @@ defmodule Polarized.Content.Server do
   def start_link(_opts \\ []), do: GenServer.start_link(__MODULE__, nil, name: __MODULE__)
 
   @impl GenServer
-  def init(nil) do
-    Process.send_after(self(), :refresh, 200)
-
-    {:ok, []}
-  end
+  def init(nil), do: {:ok, fetch_state()}
 
   def refresh, do: GenServer.cast(__MODULE__, :refresh)
 
@@ -48,9 +44,15 @@ defmodule Polarized.Content.Server do
 
     @spec fetch_state() :: [%Embed{}]
     defp fetch_state do
-      {:ok, follows} = Repo.list_follows()
+      case Repo.list_follows() do
+        {:ok, follows} ->
+          Embed.fetch(follows)
 
-      Embed.fetch(follows)
+        {:error, _reason} ->
+          Process.send_after(self(), :refresh, 200)
+
+          []
+      end
     end
 
     @spec match_left_right(:_ | boolean(), %Embed{}) :: boolean()
