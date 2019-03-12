@@ -70,7 +70,7 @@ defmodule Polarized.MixProject do
 
       # twitter
       {:oauther, "~> 1.1"},
-      {:extwitter, "~> 0.9.3"},
+      {:extwitter, git: "git@github.com:the-mikedavis/extwitter.git", branch: "behaviour"},
 
       # quantum jobs for refresh
       {:quantum, "~> 2.3"},

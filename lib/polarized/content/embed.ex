@@ -3,6 +3,9 @@ defmodule Polarized.Content.Embed do
   An embedded video or GIF.
   """
 
+  @twitter Application.get_env(:polarized, :twitter_client, ExTwitter)
+  @http Application.get_env(:polarized, :http_client, HTTPoison)
+
   defstruct html: nil, hashtags: [], username: nil
 
   alias ExTwitter.Model.Tweet
@@ -32,7 +35,7 @@ defmodule Polarized.Content.Embed do
   @spec pull_recent_tweets(String.t()) :: {:ok, [%Tweet{}]} | {:error, any()}
   def pull_recent_tweets(username) do
     try do
-      {:ok, ExTwitter.user_timeline(screen_name: username)}
+      {:ok, @twitter.user_timeline(screen_name: username)}
     rescue
       e in ExTwitter.Error -> {:error, e}
     end
@@ -62,7 +65,7 @@ defmodule Polarized.Content.Embed do
   def to_struct({%Tweet{user: %{screen_name: name}, entities: %{hashtags: hashtags}}, url}) do
     hashtags = Enum.map(hashtags, & &1.text)
 
-    case HTTPoison.get(url) do
+    case @http.get(url) do
       {:ok, %HTTPoison.Response{body: body}} ->
         embed_html =
           body

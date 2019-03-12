@@ -3,10 +3,14 @@ defmodule Polarized.Application do
 
   use Application
 
+  alias Polarized.Repo
+  alias Polarized.Content.Server, as: ContentServer
+
   def start(_type, _args) do
     children = [
-      Polarized.Repo,
-      PolarizedWeb.Endpoint
+      Repo,
+      PolarizedWeb.Endpoint,
+      ContentServer
     ]
 
     opts = [strategy: :one_for_one, name: Polarized.Supervisor]

@@ -6,5 +6,9 @@ config :polarized, PolarizedWeb.Endpoint,
   http: [port: 4442],
   server: false
 
+config :polarized,
+  twitter_client: ExTwitterMock,
+  http_client: HTTPoisonMock
+
 # Print only warnings and errors during test
 config :logger, level: :warn
