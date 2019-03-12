@@ -14,6 +14,7 @@ defmodule PolarizedWeb.PageController do
   def create(conn, %{"handle" => %{"name" => name} = handle}) do
     handle
     |> translate_handle()
+    |> cleanse_handle()
     |> Handle.changeset()
     |> Content.create_handle()
     |> case do
@@ -41,5 +42,14 @@ defmodule PolarizedWeb.PageController do
       end
 
     %{handle | "right_wing" => wingedness}
+  end
+
+  defp cleanse_handle(%{"name" => name} = handle) do
+    name =
+      name
+      |> String.replace("@", "")
+      |> String.trim()
+
+    %{handle | "name" => name}
   end
 end
