@@ -6,7 +6,7 @@ defmodule Polarized.Content.Embed do
   @twitter Application.get_env(:polarized, :twitter_client, ExTwitter)
   @http Application.get_env(:polarized, :http_client, HTTPoison)
 
-  defstruct html: nil, hashtags: [], handle: nil
+  defstruct html: nil, hashtags: [], handle: nil, id: nil
 
   alias Polarized.Content.Handle
   alias ExTwitter.Model.Tweet
@@ -64,7 +64,7 @@ defmodule Polarized.Content.Embed do
   end
 
   @spec to_struct({%Tweet{}, String.t(), Handle.t()}) :: %__MODULE__{}
-  def to_struct({%Tweet{entities: %{hashtags: hashtags}}, url, handle}) do
+  def to_struct({%Tweet{entities: %{hashtags: hashtags}, id: id}, url, handle}) do
     hashtags = Enum.map(hashtags, & &1.text)
 
     case @http.get(url) do
@@ -74,7 +74,7 @@ defmodule Polarized.Content.Embed do
           |> Jason.decode!()
           |> Map.fetch!("html")
 
-        %__MODULE__{html: embed_html, hashtags: hashtags, handle: handle}
+        %__MODULE__{html: embed_html, hashtags: hashtags, handle: handle, id: id}
 
       {:error, _reason} ->
         nil

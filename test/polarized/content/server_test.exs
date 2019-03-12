@@ -35,7 +35,8 @@ defmodule Polarized.Content.ServerTest do
     ]
   end
 
-  test "refreshing the state", %{handle: %{name: name}} = c do
+  # YARD this makes me sad...
+  test "mega test muahahahaha", %{handle: %{name: name}} = c do
     @twitter
     |> expect(:user_timeline, fn [screen_name: ^name] -> c.tweets end)
     |> allow(self(), Server)
@@ -71,6 +72,12 @@ defmodule Polarized.Content.ServerTest do
     for %{html: html} <- embeds do
       assert html =~ "blockquote"
     end
+
+    for embed <- Server.request(:_, ["FNS"]) do
+      assert "FNS" in embed.hashtags
+    end
+
+    assert [_embed] = Server.request(:_, ["Trade"])
   end
 
   defp get_req(url, http_reqs), do: Enum.find(http_reqs, &(&1.request.url == url))
