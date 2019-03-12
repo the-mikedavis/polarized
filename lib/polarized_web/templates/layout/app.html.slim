@@ -24,7 +24,8 @@ html lang="en"
             img src='#{Routes.static_path(@conn, "/images/tv.svg")}' alt="polarized.tv Logo"
           img.elephant.bg-white src='#{Routes.static_path(@conn, "/images/elephant.svg")}'
         // .py-1?
-        div.red-banner.bg-red.text-white.text-center POLARIZED.TV
+        div.red-banner.bg-red.text-center
+          a.text-white href='#{Routes.page_path(@conn, :index)}' POLARIZED.TV
 
     main.pt-8.container role="main"
       p.alert.alert-info role="alert" = get_flash(@conn, :info)
