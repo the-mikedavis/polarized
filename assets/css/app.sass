@@ -1,12 +1,10 @@
 /* This file is for your main application css. */
 
+ul
+  :list-style-type none
+
 a
   :text-decoration none
-
-$color_1: rgba(0,0,0,0)
-$color_2: rgba(0,0,0,1)
-$height: 65%
-$fatness: 2px
 
 hr
   :border 1px solid #000
@@ -27,6 +25,20 @@ a#esc-button
     :margin-right 5px
   img
     :width 50px
+
+nav
+  ul li
+    :text-align right
+    :margin 5px 0px
+    a
+      :color #777
+      &:hover
+        :color #aaa
+
+$color_1: rgba(0,0,0,0)
+$color_2: rgba(0,0,0,1)
+$height: 65%
+$fatness: 2px
 
 .background-line
   :background linear-gradient(180deg, $color_1 calc(#{$height} - #{$fatness}), $color_2 calc(#{$height}), $color_1 calc(#{$height} + #{$fatness}));
