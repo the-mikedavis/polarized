@@ -241,16 +241,13 @@ drawLeft model =
         div
             [ id "left"
             , onClick TouchLeft
-            , classList
-                (classes
-                    ++ [ ( "text-white", True )
-                       , ( "py-8", True )
-                       , ( "px-6", True )
-                       , ( "text-center", True )
-                       ]
-                )
+            , classList (( "text-white py-4 px-10 text-center flex flex-col", True ) :: classes)
             ]
-            [ text (txt ++ " the ")
+            [ span
+                [ class "smaller"
+                ]
+                [ text (txt ++ " the ")
+                ]
             , span
                 [ class "bigger uppercase"
                 ]
@@ -292,16 +289,13 @@ drawRight model =
         div
             [ id "right"
             , onClick TouchRight
-            , classList
-                (classes
-                    ++ [ ( "text-white", True )
-                       , ( "py-8", True )
-                       , ( "px-6", True )
-                       , ( "text-center", True )
-                       ]
-                )
+            , classList (( "text-white py-4 px-10 text-center flex flex-col", True ) :: classes)
             ]
-            [ text (txt ++ " the ")
+            [ span
+                [ class "smaller"
+                ]
+                [ text (txt ++ " the ")
+                ]
             , span
                 [ class "bigger uppercase"
                 ]
@@ -332,7 +326,7 @@ drawLeftRight model =
     in
         div
             [ id "left-right"
-            , class "my-20 flex justify-around items-start"
+            , class "my-20 flex justify-between items-start"
             ]
             layout
 
@@ -340,7 +334,7 @@ drawLeftRight model =
 drawHashtag : String -> Html Msg
 drawHashtag hashtag =
     div
-        [ class "w-1/2 md:w-1/4 lg:w-1/5 px-1"
+        [ class "flex-none px-2"
         ]
         [ div
             [ class "bg-red text-white py-4 px-3 my-1 shadow text-sm font-bold text-center"
@@ -351,7 +345,7 @@ drawHashtag hashtag =
                 [ text ("#" ++ hashtag)
                 ]
             , i
-                [ class "fas fa-times text-black px-1 cursor-pointer"
+                [ class "fas fa-times text-white px-1 cursor-pointer"
                 , onClick (DeleteHashtag hashtag)
                 ]
                 []
@@ -382,15 +376,15 @@ drawControlPanel model =
             , class "bg-grey px-5 pt-5"
             ]
             [ p
-                [ class "text-center text-grey-darker"
+                [ class "text-center text-grey-darker pb-5"
                 ]
                 [ text "Tune your broadcast"
                 ]
             , div
-                [ class ""
+                [ class "flex"
                 ]
                 [ label
-                    [ class "text-black"
+                    [ class "text-black flex-none mr-3 pt-1"
                     ]
                     [ text "Filter hashtags:" ]
                 , input
