@@ -351,7 +351,7 @@ drawHashtag hashtag =
                 [ text ("#" ++ hashtag)
                 ]
             , i
-                [ class "fas fa-cross text-black px-1"
+                [ class "fas fa-times text-black px-1 cursor-pointer"
                 , onClick (DeleteHashtag hashtag)
                 ]
                 []
