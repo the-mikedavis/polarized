@@ -26,7 +26,7 @@ defmodule Polarized.MixProject do
       ],
       dialyzer: [
         ignore_warnings: ".dialyzer_ignore.exs",
-        plt_add_apps: [:mnesia]
+        plt_add_apps: [:mnesia, :ex_unit]
       ]
     ]
   end

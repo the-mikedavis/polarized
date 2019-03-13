@@ -3,8 +3,6 @@ defmodule PolarizedWeb.UserControllerTest do
 
   alias Polarized.Repo
 
-  import Plug.Test, only: [init_test_session: 2]
-
   describe "un-logged in access is redirected to /session/new" do
     test "GET /", %{conn: conn} do
       conn = get(conn, Routes.user_path(conn, :index))
@@ -13,15 +11,7 @@ defmodule PolarizedWeb.UserControllerTest do
   end
 
   describe "logged in access" do
-    setup %{conn: conn} do
-      username = "another_user"
-
-      [
-        username: username,
-        password: "password",
-        conn: init_test_session(conn, %{user_id: "adminimum"})
-      ]
-    end
+    setup :as_admin
 
     test "listing users", %{conn: conn} do
       conn = get(conn, Routes.user_path(conn, :index))
@@ -40,15 +30,17 @@ defmodule PolarizedWeb.UserControllerTest do
     end
 
     test "creating a new user (success)", %{conn: conn} = c do
-      params = %{"user" => %{"username" => c.username, "password" => c.password}}
+      uname = "another user"
+
+      params = %{"user" => %{"username" => uname, "password" => c.password}}
       conn = post(conn, Routes.user_path(conn, :create), params)
 
       assert html_response(conn, 302) =~ "/"
 
       {:ok, users} = Repo.list_users()
-      assert c.username in users
+      assert uname in users
 
-      assert :ok = Repo.remove_user(c.username)
+      assert :ok = Repo.remove_user(uname)
     end
 
     test "creating a new user when that user already exists", %{conn: conn} = c do
@@ -58,24 +50,14 @@ defmodule PolarizedWeb.UserControllerTest do
       assert html_response(conn, 200) =~ "User could not be created"
     end
 
-    test "trying to edit a different user fails", %{conn: conn} = c do
-      conn = get(conn, "/admin/user/#{c.username}/edit")
+    test "trying to edit a different user fails", %{conn: conn} do
+      conn = get(conn, "/admin/user/another_user/edit")
       assert html_response(conn, 302) =~ "/admin/user"
     end
   end
 
   describe "operations with one's own self" do
-    setup %{conn: conn} do
-      username = "useruser"
-      password = "password"
-      conn = init_test_session(conn, %{user_id: username})
-
-      Repo.insert_user(%{username: username, password: password})
-
-      on_exit(fn -> Repo.remove_user(username) end)
-
-      [username: username, password: password, conn: conn]
-    end
+    setup :as_admin
 
     test "getting the edit page", %{conn: conn} = c do
       conn = get(conn, "/admin/user/#{c.username}/edit")
