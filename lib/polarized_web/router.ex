@@ -21,6 +21,7 @@ defmodule PolarizedWeb.Router do
 
     get "/", PageController, :index
     post "/", PageController, :create
+    get "/stream/:id", ContentController, :stream
     get "/credits", PageController, :credits
     resources "/session", SessionController, only: [:new, :create]
     post "/session/delete", SessionController, :delete
