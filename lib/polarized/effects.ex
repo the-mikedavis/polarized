@@ -30,7 +30,7 @@ defmodule Polarized.Effects do
     @spec continue_download({reference(), integer()}) ::
             {[binary()] | :halt, {reference(), integer()}}
     defp continue_download({client, size}) do
-      case :hackney.stream_body({client, size}) do
+      case :hackney.stream_body(client) do
         {:ok, data} ->
           {[data], {client, size + byte_size(data)}}
 
