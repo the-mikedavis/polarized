@@ -46,8 +46,7 @@ defmodule Polarized.Content do
   private do
     @spec begin_download(String.t()) :: {any(), integer(), integer()}
     defp begin_download(url) do
-      {:ok, _status, headers, client} =
-        :hackney.get(url, [], "", [])
+      {:ok, _status, headers, client} = :hackney.get(url, [], "", [])
 
       total_size =
         headers
@@ -57,7 +56,8 @@ defmodule Polarized.Content do
       {client, total_size, 0}
     end
 
-    @spec continue_download({any(), integer(), integer()}) :: {binary(), {any(), integer(), integer()}} | nil
+    @spec continue_download({any(), integer(), integer()}) ::
+            {binary(), {any(), integer(), integer()}} | nil
     defp continue_download({client, total_size, size}) do
       case :hackney.stream_body(client) do
         {:ok, data} ->

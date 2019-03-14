@@ -13,6 +13,7 @@ defmodule PolarizedWeb.ContentController do
     |> case do
       %Embed{} = embed ->
         Content.send_video(conn, headers, embed)
+
       nil ->
         send_resp(conn, 404, "")
     end

@@ -11,7 +11,7 @@ defmodule PolarizedWeb.ContentControllerTest do
 
   setup do
     embed = %Embed{
-      id: 113654156,
+      id: 113_654_156,
       dest: Path.join([File.cwd!(), "data", "video.mp4"])
     }
 
