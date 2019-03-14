@@ -146,7 +146,6 @@ update msg model =
                         ( model, Cmd.none )
 
         TouchLeft ->
-            {- TODO should make a req for new embeds -}
             let
                 newWingedness =
                     case model.wingedness of
@@ -162,10 +161,9 @@ update msg model =
                         NoWing ->
                             LeftWing
             in
-                ( { model | wingedness = newWingedness }, Cmd.none )
+                lean model newWingedness
 
         TouchRight ->
-            {- TODO should make a req for new embeds -}
             let
                 newWingedness =
                     case model.wingedness of
@@ -181,7 +179,7 @@ update msg model =
                         NoWing ->
                             RightWing
             in
-                ( { model | wingedness = newWingedness }, Cmd.none )
+                lean model newWingedness
 
         StartHashtag str ->
             ( { model | wantedInProgress = str }, Cmd.none )
@@ -189,13 +187,17 @@ update msg model =
         KeyDown keyCode ->
             {- TODO should make a req for new embeds -}
             if keyCode == 13 then
-                ( { model | wantedHashtags = model.wantedInProgress :: model.wantedHashtags, wantedInProgress = "" }, Cmd.none )
+                ( { model | wantedHashtags = model.wantedInProgress :: model.wantedHashtags, wantedInProgress = "" }
+                , Cmd.none
+                )
             else
                 ( model, Cmd.none )
 
         DeleteHashtag hashtag ->
             {- TODO should make a req for new embeds -}
-            ( { model | wantedHashtags = List.filter (\h -> h /= hashtag) model.wantedHashtags }, Cmd.none )
+            ( { model | wantedHashtags = List.filter (\h -> h /= hashtag) model.wantedHashtags }
+            , Cmd.none
+            )
 
 
 subscriptions : Model -> Sub Msg
@@ -212,6 +214,61 @@ joinChannel =
 onKeyDown : (Int -> msg) -> Attribute msg
 onKeyDown tagger =
     on "keydown" (Decode.map tagger keyCode)
+
+
+wingString : Wingedness -> String
+wingString wingedness =
+    case wingedness of
+        BothWing ->
+            "both"
+
+        RightWing ->
+            "right"
+
+        LeftWing ->
+            "left"
+
+        NoWing ->
+            "none"
+
+
+lean : Model -> Wingedness -> ( Model, Cmd Msg )
+lean model wingedness =
+    case wingedness of
+        NoWing ->
+            ( { model
+                | wingedness = wingedness
+                , embeds = Array.fromList []
+                , currentEmbed = 0
+              }
+            , Cmd.none
+            )
+
+        _ ->
+            let
+                wingStr =
+                    wingString wingedness
+
+                payload =
+                    Encode.object
+                        [ ( "wingedness", Encode.string wingStr )
+                        , ( "hashtags", Encode.list (List.map Encode.string model.hashtags) )
+                        ]
+
+                phxPush =
+                    Phoenix.Push.init "embeds" "player:lobby"
+                        |> Phoenix.Push.withPayload payload
+                        |> Phoenix.Push.onOk PopulateEmbeds
+
+                ( phxSocket, phxCmd ) =
+                    Phoenix.Socket.push phxPush model.phxSocket
+            in
+                ( { model
+                    | wingedness = wingedness
+                    , phxSocket = phxSocket
+                  }
+                , Cmd.map PhoenixMsg phxCmd
+                )
 
 
 
