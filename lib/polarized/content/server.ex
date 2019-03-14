@@ -62,16 +62,16 @@ defmodule Polarized.Content.Server do
   def handle_call({:get, id}, _from, state), do: {:reply, Map.get(state, id), state}
 
   @impl GenServer
-  def handle_cast(:refresh, _state), do: {:noreply, fetch_state()}
-
   def handle_cast({:enrich, embed}, state) do
     embed = Content.download_embed(embed)
 
     {:noreply, Map.put(state, embed.id, embed)}
   end
 
+  def handle_cast(:refresh, state), do: {:noreply, fetch_state(state)}
+
   @impl GenServer
-  def handle_info(:refresh, _state), do: {:noreply, fetch_state()}
+  def handle_info(:refresh, state), do: {:noreply, fetch_state(state)}
 
   private do
     alias Polarized.Repo
@@ -94,6 +94,15 @@ defmodule Polarized.Content.Server do
 
           []
       end
+    end
+
+    @spec fetch_state(state()) :: state()
+    defp fetch_state(prior_state) do
+      for {_id, embed} <- prior_state do
+        :ok = File.rm!(embed.dest)
+      end
+
+      fetch_state()
     end
 
     @spec match_left_right(:_ | boolean(), %Embed{}) :: boolean()

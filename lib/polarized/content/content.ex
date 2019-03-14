@@ -3,6 +3,8 @@ defmodule Polarized.Content do
 
   use Private
 
+  @effects Application.get_env(:polarized, :effects_client, :effects)
+
   alias __MODULE__.{Embed, Handle}
   alias Ecto.Changeset
   alias Polarized.Repo
@@ -30,40 +32,9 @@ defmodule Polarized.Content do
   def download_embed(%Embed{source_url: url} = embed) do
     dest = download_path(embed)
 
-    unless File.exists?(dest) do
-      file = File.stream!(dest, [:write, :binary])
-
-      :ok =
-        fn -> begin_download(url) end
-        |> Stream.resource(&continue_download/1, &finish_download/1)
-        |> Stream.into(file)
-        |> Stream.run()
-    end
+    unless File.exists?(dest), do: :ok = @effects.download_file(url, dest)
 
     %Embed{embed | dest: dest}
-  end
-
-  private do
-    @spec begin_download(String.t()) :: reference()
-    defp begin_download(url) do
-      {:ok, _status, _headers, client} = :hackney.get(url, [], "", [])
-
-      client
-    end
-
-    @spec continue_download(reference()) :: {[binary()] | :halt, reference()}
-    defp continue_download(client) do
-      case :hackney.stream_body(client) do
-        {:ok, data} ->
-          {[data], client}
-
-        :done ->
-          {:halt, client}
-      end
-    end
-
-    @spec finish_download(reference()) :: :ok
-    defp finish_download(_client), do: :ok
   end
 
   @doc """

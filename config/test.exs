@@ -9,7 +9,8 @@ config :polarized, PolarizedWeb.Endpoint,
 config :polarized,
   twitter_client: ExTwitterMock,
   http_client: HTTPoisonMock,
-  content_server: ContentServerMock
+  content_server: ContentServerMock,
+  effects_client: EffectsMock
 
 # Print only warnings and errors during test
 config :logger, level: :warn

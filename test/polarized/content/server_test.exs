@@ -5,6 +5,7 @@ defmodule Polarized.Content.ServerTest do
   alias Polarized.Content.{Handle, Server}
 
   @twitter Application.fetch_env!(:polarized, :twitter_client)
+  @effects Application.fetch_env!(:polarized, :effects_client)
 
   import Mox
 
@@ -23,6 +24,7 @@ defmodule Polarized.Content.ServerTest do
 
     on_exit(fn ->
       :ok = Repo.unfollow_handle(handle.name)
+
       Server.refresh()
     end)
 
@@ -35,6 +37,14 @@ defmodule Polarized.Content.ServerTest do
   test "megatest muahahaha", c do
     @twitter
     |> expect(:user_timeline, fn [screen_name: _] -> c.tweets end)
+    |> allow(self(), Server)
+
+    @effects
+    |> expect(:download_file, 11, fn _, dest ->
+      [File.cwd!(), "data", "video.mp4"]
+      |> Path.join()
+      |> File.cp!(dest)
+    end)
     |> allow(self(), Server)
 
     Server.refresh()
@@ -50,6 +60,8 @@ defmodule Polarized.Content.ServerTest do
     for embed <- Server.request(:_, ["FNS"]) do
       assert "FNS" in embed.hashtags
     end
+
+    Process.sleep(100)
   end
 
   test "bad username gives empty list and no error" do
