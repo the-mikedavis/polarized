@@ -3,6 +3,8 @@ defmodule Polarized.Effects do
 
   use Private
 
+  require Logger
+
   alias __MODULE__.Behaviour
   @behaviour Behaviour
 
@@ -39,5 +41,22 @@ defmodule Polarized.Effects do
 
     @spec finish_download({reference(), integer()}) :: :ok
     defp finish_download({_client, _size}), do: :ok
+  end
+
+  def setup_tables(tables) do
+    for {table_name, attributes} <- tables do
+      table_name
+      |> :mnesia.create_table(attributes: attributes, disc_copies: [node()])
+      |> case do
+        {:atomic, :ok} ->
+          Logger.info("#{table_name} table created with attributes #{inspect(attributes)}.")
+
+        {:aborted, {:already_exists, ^table_name}} ->
+          :ok
+
+        {:aborted, reason} ->
+          Logger.error("Could not create #{table_name} table. Reason: #{inspect(reason)}")
+      end
+    end
   end
 end

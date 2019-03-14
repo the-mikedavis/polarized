@@ -78,22 +78,16 @@ defmodule Polarized.Content.Server do
 
     @spec fetch_state() :: state()
     defp fetch_state do
-      case Repo.list_follows() do
-        {:ok, follows} ->
-          state =
-            follows
-            |> Embed.fetch()
-            |> Enum.reduce(%{}, fn embed, acc -> Map.put(acc, embed.id, embed) end)
+      {:ok, follows} = Repo.list_follows()
 
-          for {_id, embed} <- state, do: enrich(embed)
+      state =
+        follows
+        |> Embed.fetch()
+        |> Enum.reduce(%{}, fn embed, acc -> Map.put(acc, embed.id, embed) end)
 
-          state
+      for {_id, embed} <- state, do: enrich(embed)
 
-        {:error, _reason} ->
-          Process.send_after(self(), :refresh, 200)
-
-          []
-      end
+      state
     end
 
     @spec fetch_state(state()) :: state()

@@ -3,29 +3,6 @@ require Logger
 
 Logger.info("Running seeds for #{Mix.env()}")
 
-tables = [
-  {Admin, [:username, :password]},
-  {Polarized.Content.Handle, [:name, :right_wing]},
-  {Follow, [:name, :right_wing]}
-]
-
-# sets up the tables necessary to operate the app
-
-for {table_name, attributes} <- tables do
-  table_name
-  |> Mnesia.create_table(attributes: attributes, disc_copies: [node()])
-  |> case do
-    {:atomic, :ok} ->
-      Logger.info("#{table_name} table created with attributes #{inspect(attributes)}.")
-
-    {:aborted, {:already_exists, ^table_name}} ->
-      Logger.info("#{table_name} table already exists.")
-
-    {:aborted, reason} ->
-      Logger.error("Could not create #{table_name} table. Reason: #{inspect(reason)}")
-  end
-end
-
 # setup the initial admin user
 Logger.info("Inserting default admin user...")
 
