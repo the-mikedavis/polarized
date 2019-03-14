@@ -37,7 +37,7 @@ defmodule Polarized.Content.Embed do
       try do
         {:ok, @twitter.user_timeline(screen_name: username)}
       rescue
-        e in ExTwitter.Error -> {:error, e}
+        e -> {:error, e}
       end
     end
 

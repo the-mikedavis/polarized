@@ -1,4 +1,3 @@
-alias :mnesia, as: Mnesia
 require Logger
 
 Logger.info("Running seeds for #{Mix.env()}")

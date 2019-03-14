@@ -3,7 +3,7 @@ defmodule Polarized.Content do
 
   use Private
 
-  @effects Application.get_env(:polarized, :effects_client, :effects)
+  @effects Application.get_env(:polarized, :effects_client, Polarized.Effects)
 
   alias __MODULE__.{Embed, Handle}
   alias Ecto.Changeset

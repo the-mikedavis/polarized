@@ -52,6 +52,8 @@ defmodule Polarized.Repo do
 
     Polarized.Effects.setup_tables(@tables)
 
+    :ok = :mnesia.wait_for_tables(:mnesia.system_info(:local_tables), 5_000)
+
     {:ok, args}
   end
 

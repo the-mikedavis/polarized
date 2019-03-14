@@ -35,6 +35,7 @@ defmodule Polarized.Content.Server do
   @impl GenServer
   def init(nil), do: {:ok, fetch_state()}
 
+  @impl Behaviour
   def refresh, do: GenServer.cast(__MODULE__, :refresh)
 
   def enrich(embed), do: GenServer.cast(__MODULE__, {:enrich, embed})
