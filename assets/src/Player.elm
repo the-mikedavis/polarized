@@ -6,7 +6,7 @@ import Html.Events exposing (..)
 import Html.Attributes exposing (..)
 import Json.Encode as Encode
 import Json.Decode as Decode
-import Json.Decode.Pipeline
+import Json.Decode.Pipeline as Pipeline
 import Task
 import Phoenix.Socket
 import Phoenix.Channel
@@ -24,10 +24,31 @@ type Wingedness
     | NoWing
 
 
+type alias Embed =
+    { hashtags : List String
+    , id : Int
+    , handle_name : String
+    }
+
+
+decodeEmbed : Decode.Decoder Embed
+decodeEmbed =
+    Pipeline.decode Embed
+        |> Pipeline.required "hashtags" (Decode.list Decode.string)
+        |> Pipeline.required "id" (Decode.int)
+        |> Pipeline.required "handle_name" (Decode.string)
+
+
+embedListDecoder : Decode.Decoder (List Embed)
+embedListDecoder =
+    Decode.list decodeEmbed
+
+
 type alias Model =
     { hashtags : List String
     , phxSocket : Phoenix.Socket.Socket Msg
-    , embedId : Maybe Int
+    , embeds : Array Embed
+    , currentEmbed : Int
     , wingedness : Wingedness
     , wantedHashtags : List String
     , wantedInProgress : String
@@ -51,7 +72,8 @@ init flags =
         model =
             { hashtags = []
             , phxSocket = initSocket
-            , embedId = Nothing
+            , embeds = Array.fromList []
+            , currentEmbed = 0
             , wingedness = NoWing
             , wantedHashtags = []
             , wantedInProgress = ""
@@ -68,6 +90,7 @@ type Msg
     = PhoenixMsg (Phoenix.Socket.Msg Msg)
     | JoinChannel
     | PopulateHashtags Encode.Value
+    | PopulateEmbeds Encode.Value
     | TouchLeft
     | TouchRight
     | StartHashtag String
@@ -110,7 +133,20 @@ update msg model =
                     Err error ->
                         ( model, Cmd.none )
 
+        PopulateEmbeds raw ->
+            let
+                msg =
+                    Decode.decodeValue (Decode.field "embeds" embedListDecoder) raw
+            in
+                case msg of
+                    Ok message ->
+                        ( { model | embeds = Array.fromList message }, Cmd.none )
+
+                    Err error ->
+                        ( model, Cmd.none )
+
         TouchLeft ->
+            {- TODO should make a req for new embeds -}
             let
                 newWingedness =
                     case model.wingedness of
@@ -129,6 +165,7 @@ update msg model =
                 ( { model | wingedness = newWingedness }, Cmd.none )
 
         TouchRight ->
+            {- TODO should make a req for new embeds -}
             let
                 newWingedness =
                     case model.wingedness of
