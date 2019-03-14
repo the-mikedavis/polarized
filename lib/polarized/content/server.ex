@@ -4,6 +4,9 @@ defmodule Polarized.Content.Server do
 
   alias Polarized.Content
   alias Content.{Embed, Handle}
+  alias __MODULE__.Behaviour
+
+  @behaviour Behaviour
 
   # embed id => %Embed{}
   @typep state :: %{integer() => %Embed{}}
@@ -15,14 +18,14 @@ defmodule Polarized.Content.Server do
   ## public-ish stuff
 
   @doc "Retreives a set of embeds that match a request"
-  @spec request(:_ | boolean(), :_ | [String.t()]) :: [%Embed{}]
+  @impl Behaviour
   def request(right_wing?, hashtags),
     do: GenServer.call(__MODULE__, {:request, right_wing?, hashtags})
 
-  @spec list_hashtags() :: [String.t()]
+  @impl Behaviour
   def list_hashtags, do: GenServer.call(__MODULE__, :hashtags)
 
-  @spec get(integer()) :: %Embed{} | nil
+  @impl Behaviour
   def get(id), do: GenServer.call(__MODULE__, {:get, id})
 
   ## private-ish stuff

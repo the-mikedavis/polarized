@@ -2,7 +2,14 @@ defmodule PolarizedWeb.SuggestionControllerTest do
   use PolarizedWeb.ConnCase, async: false
 
   alias Polarized.Content.Handle
+  alias Polarized.Content.Server, as: ContentServer
   alias Polarized.Repo
+
+  import Mox
+
+  @twitter Application.fetch_env!(:polarized, :twitter_client)
+
+  setup :verify_on_exit!
 
   setup :as_admin
 
@@ -35,6 +42,10 @@ defmodule PolarizedWeb.SuggestionControllerTest do
     end
 
     test "approving a suggestion", %{conn: conn, username: username} = c do
+      @twitter
+      |> expect(:user_timeline, fn [screen_name: ^username] -> [] end)
+      |> allow(self(), ContentServer)
+
       params = %{"name" => username}
       conn = put(conn, Routes.suggestion_path(conn, :approve, c.record), params)
       assert html_response(conn, 302) =~ "/admin/suggestions"
@@ -48,6 +59,8 @@ defmodule PolarizedWeb.SuggestionControllerTest do
       {:ok, handles} = Repo.list_handles()
 
       refute username in Enum.map(handles, & &1.name)
+
+      ContentServer.refresh()
     end
   end
 

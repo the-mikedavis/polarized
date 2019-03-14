@@ -17,7 +17,7 @@ defmodule PolarizedWeb.SuggestionController do
   def approve(conn, %{"name" => name}) do
     :ok = Repo.follow_handle(name)
 
-    ContentServer.refresh()
+    :ok = ContentServer.refresh()
 
     redirect(conn, to: Routes.suggestion_path(conn, :index))
   end

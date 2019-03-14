@@ -23,9 +23,8 @@ defmodule Polarized.Content do
   @spec download_dir() :: Path.t()
   def download_dir, do: Path.join("#{:code.priv_dir(:polarized)}", "downloads")
 
-  @spec download_path(%Embed{} | integer()) :: Path.t()
-  def download_path(%Embed{id: id}), do: download_path(id)
-  def download_path(id), do: Path.join(download_dir(), "#{id}.mp4")
+  @spec download_path(%Embed{}) :: Path.t()
+  def download_path(%Embed{id: id}), do: Path.join(download_dir(), "#{id}.mp4")
 
   @spec download_embed(%Embed{}) :: %Embed{}
   def download_embed(%Embed{source_url: url} = embed) do
@@ -81,9 +80,9 @@ defmodule Polarized.Content do
   @doc """
   Send a video out of a socket.
   """
-  @spec send_video(Plug.Conn.t(), Keyword.t(), %Embed{} | integer()) :: Plug.Conn.t()
+  @spec send_video(Plug.Conn.t(), Keyword.t(), %Embed{}) :: Plug.Conn.t()
   def send_video(conn, headers, embed) do
-    video_path = download_path(embed)
+    video_path = embed.dest
     offset = get_offset(headers)
     file_size = get_file_size(video_path)
 

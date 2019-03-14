@@ -4,7 +4,6 @@ defmodule Polarized.Content.ServerTest do
   alias Polarized.Repo
   alias Polarized.Content.{Handle, Server}
 
-  @http Application.fetch_env!(:polarized, :http_client)
   @twitter Application.fetch_env!(:polarized, :twitter_client)
 
   import Mox
@@ -22,11 +21,6 @@ defmodule Polarized.Content.ServerTest do
       |> Path.join()
       |> Code.eval_file()
 
-    {https, _} =
-      [File.cwd!(), "data", "http_reqs.exs"]
-      |> Path.join()
-      |> Code.eval_file()
-
     on_exit(fn ->
       :ok = Repo.unfollow_handle(handle.name)
       Server.refresh()
@@ -34,51 +28,24 @@ defmodule Polarized.Content.ServerTest do
 
     [
       handle: handle,
-      tweets: tweets,
-      http_reqs: https
+      tweets: tweets
     ]
   end
-
-  def get_req(url, http_reqs), do: Enum.find(http_reqs, &(&1.request.url == url))
 
   test "megatest muahahaha", c do
     @twitter
     |> expect(:user_timeline, fn [screen_name: _] -> c.tweets end)
     |> allow(self(), Server)
 
-    @http
-    |> expect(:get, 11, fn url ->
-      {:ok, get_req(url, c.http_reqs)}
-    end)
-    |> allow(self(), Server)
-
     Server.refresh()
 
     Process.sleep(10)
 
+    assert Server.get(5) == nil
+
     assert ["FNS", "Trade"] = Server.list_hashtags()
 
     assert [_embed] = Server.request(:_, ["Trade"])
-
-    embeds = :sys.get_state(Server)
-
-    assert Enum.map(embeds, & &1.hashtags) == [
-             [],
-             ["FNS"],
-             ["FNS"],
-             ["FNS"],
-             ["FNS"],
-             ["FNS"],
-             ["FNS"],
-             ["FNS", "Trade"],
-             ["FNS"],
-             ["FNS"],
-             ["FNS"]
-           ]
-
-    for %{html: html} <- embeds do
-      assert html =~ "blockquote"
-    end
 
     for embed <- Server.request(:_, ["FNS"]) do
       assert "FNS" in embed.hashtags
@@ -94,6 +61,6 @@ defmodule Polarized.Content.ServerTest do
 
     embeds = Server.fetch_state()
 
-    assert embeds == []
+    assert embeds == %{}
   end
 end
