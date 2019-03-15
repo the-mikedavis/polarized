@@ -108,9 +108,9 @@ defmodule Polarized.Content.Server do
     # clashing booleans
     def match_left_right(_, _), do: false
 
-    @spec match_hashtags(:_ | [String.t()], %Embed{}) :: boolean()
+    @spec match_hashtags([String.t()], %Embed{}) :: boolean()
     # match all
-    def match_hashtags(:_, _), do: true
+    def match_hashtags([], _), do: true
     # match if any of the wants are in the haves
     def match_hashtags(wants, %Embed{hashtags: haves}), do: Enum.any?(wants, &(&1 in haves))
   end
