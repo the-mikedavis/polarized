@@ -185,19 +185,24 @@ update msg model =
             ( { model | wantedInProgress = str }, Cmd.none )
 
         KeyDown keyCode ->
-            {- TODO should make a req for new embeds -}
             if keyCode == 13 then
-                ( { model | wantedHashtags = model.wantedInProgress :: model.wantedHashtags, wantedInProgress = "" }
-                , Cmd.none
-                )
+                let
+                    newModel =
+                        { model
+                            | wantedHashtags = model.wantedInProgress :: model.wantedHashtags
+                            , wantedInProgress = ""
+                        }
+                in
+                    lean newModel model.wingedness
             else
                 ( model, Cmd.none )
 
         DeleteHashtag hashtag ->
-            {- TODO should make a req for new embeds -}
-            ( { model | wantedHashtags = List.filter (\h -> h /= hashtag) model.wantedHashtags }
-            , Cmd.none
-            )
+            let
+                newModel =
+                    { model | wantedHashtags = List.filter (\h -> h /= hashtag) model.wantedHashtags }
+            in
+                lean newModel model.wingedness
 
 
 subscriptions : Model -> Sub Msg
@@ -252,7 +257,7 @@ lean model wingedness =
                 payload =
                     Encode.object
                         [ ( "wingedness", Encode.string wingStr )
-                        , ( "hashtags", Encode.list (List.map Encode.string model.hashtags) )
+                        , ( "hashtags", Encode.list (List.map Encode.string model.wantedHashtags) )
                         ]
 
                 phxPush =
