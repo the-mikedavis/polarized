@@ -33,7 +33,11 @@ defmodule Polarized.Content.Server do
   def start_link(_opts \\ []), do: GenServer.start_link(__MODULE__, nil, name: __MODULE__)
 
   @impl GenServer
-  def init(nil), do: {:ok, fetch_state()}
+  def init(nil) do
+    File.mkdir_p!(Content.download_dir())
+
+    {:ok, fetch_state()}
+  end
 
   @impl Behaviour
   def refresh, do: GenServer.cast(__MODULE__, :refresh)
