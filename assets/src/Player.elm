@@ -227,16 +227,29 @@ update msg model =
             let
                 newIndex =
                     model.currentEmbed + 1
+
+                uri =
+                    case (Array.get newIndex model.embeds) of
+                        Just embed ->
+                            "/stream/" ++ embed.id
+
+                        Nothing ->
+                            ""
             in
-                ( { model | currentEmbed = newIndex }, Cmd.none )
+                ( { model
+                      | currentEmbed = newIndex
+                      , currentUri = uri
+                  }
+                , playVideo uri
+                )
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    [ Phoenix.Socket.listen model.phxSocket PhoenixMsg
-    , videoEnded EmbedEnded
-    ]
-        |> Sub.batch
+    Sub.batch
+        [ Phoenix.Socket.listen model.phxSocket PhoenixMsg
+        , videoEnded EmbedEnded
+        ]
 
 
 joinChannel : Cmd Msg

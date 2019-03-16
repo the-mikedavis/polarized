@@ -8,41 +8,21 @@ const player = document.getElementById('player')
 if (player) {
   const app = Player.embed(player, {uri: buildSocketUri()})
 
+  window.app = app;
+
   window.addEventListener('load', function () {
     const videoElem = document.getElementById('theater')
-
-    // let pastUri = "";
-
-    // function watchVideo () {
-    //   let newUri = document.getElementById('theater').firstElementChild.getAttribute('src');
-    //   if (newUri != pastUri) {
-    //     videoElem.load();
-    //     if (newUri != "")
-    //       videoElem.play();
-    //   }
-    //   pastUri = newUri;
-
-    //   setTimeout(watchVideo, 1000);
-    // }
-
-    // setTimeout(watchVideo, 1000);
 
     app.ports.playVideo.subscribe(function (uri) {
       let videoElem = document.getElementById('theater');
       setTimeout(() => {
         videoElem.load();
         videoElem.play();
+
+        videoElem.addEventListener('ended', function () {
+          app.ports.videoEnded.send(true);
+        });
       }, 100);
-    });
-
-    // var observer = new MutationObserver(function (m) {
-    //   console.log(m)
-    // });
-
-    // observer.observe(videoElem, {attributes: true})
-
-    videoElem.addEventListener('ended', function () {
-      app.ports.videoEnded.send(true);
     });
   });
 }
