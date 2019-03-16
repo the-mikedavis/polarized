@@ -32,6 +32,12 @@ defmodule Polarized.Repo do
 
   def start_link(args), do: GenServer.start_link(__MODULE__, args, name: __MODULE__)
 
+  @tables [
+    {Admin, [:username, :password]},
+    {Polarized.Content.Handle, [:name, :right_wing]},
+    {Follow, [:name, :right_wing]}
+  ]
+
   @impl GenServer
   def init(args) do
     :mnesia
@@ -41,6 +47,10 @@ defmodule Polarized.Repo do
     :mnesia.create_schema([node()])
 
     :ok = :mnesia.start()
+
+    :ok = :mnesia.wait_for_tables(:mnesia.system_info(:local_tables), 5_000)
+
+    Polarized.Effects.setup_tables(@tables)
 
     :ok = :mnesia.wait_for_tables(:mnesia.system_info(:local_tables), 5_000)
 

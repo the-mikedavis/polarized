@@ -4,6 +4,8 @@ defmodule PolarizedWeb.SuggestionController do
   alias Polarized.Repo
   alias Polarized.Content.Server, as: ContentServer
 
+  @content_server Application.get_env(:polarized, :content_server, ContentServer)
+
   def index(conn, _params) do
     {:ok, handles} = Repo.list_handles()
     {:ok, follows} = Repo.list_follows()
@@ -17,7 +19,7 @@ defmodule PolarizedWeb.SuggestionController do
   def approve(conn, %{"name" => name}) do
     :ok = Repo.follow_handle(name)
 
-    ContentServer.refresh()
+    :ok = @content_server.refresh()
 
     redirect(conn, to: Routes.suggestion_path(conn, :index))
   end

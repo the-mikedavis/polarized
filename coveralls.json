@@ -8,6 +8,7 @@
     "deps/*",
     "lib/polarized_web.ex",
     "lib/polarized_web/router.ex",
-    "lib/polarized_web/views/error_helpers.ex"
+    "lib/polarized_web/views/error_helpers.ex",
+    "lib/polarized/effects.ex"
   ]
 }

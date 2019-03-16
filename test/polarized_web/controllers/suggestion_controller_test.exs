@@ -4,6 +4,12 @@ defmodule PolarizedWeb.SuggestionControllerTest do
   alias Polarized.Content.Handle
   alias Polarized.Repo
 
+  import Mox
+
+  @content_server Application.fetch_env!(:polarized, :content_server)
+
+  setup :verify_on_exit!
+
   setup :as_admin
 
   describe "suggestions" do
@@ -35,6 +41,8 @@ defmodule PolarizedWeb.SuggestionControllerTest do
     end
 
     test "approving a suggestion", %{conn: conn, username: username} = c do
+      expect(@content_server, :refresh, fn -> :ok end)
+
       params = %{"name" => username}
       conn = put(conn, Routes.suggestion_path(conn, :approve, c.record), params)
       assert html_response(conn, 302) =~ "/admin/suggestions"
@@ -44,6 +52,8 @@ defmodule PolarizedWeb.SuggestionControllerTest do
       assert username in Enum.map(follows, & &1.name)
 
       assert :ok = Repo.unfollow_handle(username)
+
+      assert {:ok, []} = Repo.list_follows()
 
       {:ok, handles} = Repo.list_handles()
 

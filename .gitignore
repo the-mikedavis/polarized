@@ -20,6 +20,8 @@ npm-debug.log
 
 /priv/static/
 
+/priv/downloads/
+
 /config/*.secret.exs
 
 .goose_api_token

@@ -6,7 +6,7 @@ import Html.Events exposing (..)
 import Html.Attributes exposing (..)
 import Json.Encode as Encode
 import Json.Decode as Decode
-import Json.Decode.Pipeline
+import Json.Decode.Pipeline as Pipeline
 import Task
 import Phoenix.Socket
 import Phoenix.Channel
@@ -24,10 +24,32 @@ type Wingedness
     | NoWing
 
 
+type alias Embed =
+    { hashtags : List String
+    , id : String
+    , handle_name : String
+    }
+
+
+decodeEmbed : Decode.Decoder Embed
+decodeEmbed =
+    Pipeline.decode Embed
+        |> Pipeline.required "hashtags" (Decode.list Decode.string)
+        |> Pipeline.required "id" (Decode.string)
+        |> Pipeline.required "handle_name" (Decode.string)
+
+
+embedListDecoder : Decode.Decoder (List Embed)
+embedListDecoder =
+    Decode.list decodeEmbed
+
+
 type alias Model =
     { hashtags : List String
     , phxSocket : Phoenix.Socket.Socket Msg
-    , embedId : Maybe Int
+    , embeds : Array Embed
+    , currentEmbed : Int
+    , currentUri : String
     , wingedness : Wingedness
     , wantedHashtags : List String
     , wantedInProgress : String
@@ -51,7 +73,9 @@ init flags =
         model =
             { hashtags = []
             , phxSocket = initSocket
-            , embedId = Nothing
+            , embeds = Array.empty
+            , currentEmbed = 0
+            , currentUri = ""
             , wingedness = NoWing
             , wantedHashtags = []
             , wantedInProgress = ""
@@ -68,11 +92,13 @@ type Msg
     = PhoenixMsg (Phoenix.Socket.Msg Msg)
     | JoinChannel
     | PopulateHashtags Encode.Value
+    | PopulateEmbeds Encode.Value
     | TouchLeft
     | TouchRight
     | StartHashtag String
     | KeyDown Int
     | DeleteHashtag String
+    | EmbedEnded Bool
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -110,6 +136,34 @@ update msg model =
                     Err error ->
                         ( model, Cmd.none )
 
+        PopulateEmbeds raw ->
+            let
+                msg =
+                    Decode.decodeValue (Decode.field "embeds" embedListDecoder) raw
+
+                embeds =
+                    case msg of
+                        Ok message ->
+                            Array.fromList message
+
+                        Err error ->
+                            Array.empty
+
+                uri =
+                    case (Array.get model.currentEmbed embeds) of
+                        Just embed ->
+                            "/stream/" ++ embed.id
+
+                        Nothing ->
+                            "/stream/-1"
+            in
+                ( { model
+                    | embeds = embeds
+                    , currentUri = uri
+                  }
+                , playVideo uri
+                )
+
         TouchLeft ->
             let
                 newWingedness =
@@ -126,7 +180,7 @@ update msg model =
                         NoWing ->
                             LeftWing
             in
-                ( { model | wingedness = newWingedness }, Cmd.none )
+                lean model newWingedness
 
         TouchRight ->
             let
@@ -144,26 +198,58 @@ update msg model =
                         NoWing ->
                             RightWing
             in
-                ( { model | wingedness = newWingedness }, Cmd.none )
+                lean model newWingedness
 
         StartHashtag str ->
             ( { model | wantedInProgress = str }, Cmd.none )
 
         KeyDown keyCode ->
-            {- TODO should make a req for new embeds -}
             if keyCode == 13 then
-                ( { model | wantedHashtags = model.wantedInProgress :: model.wantedHashtags, wantedInProgress = "" }, Cmd.none )
+                let
+                    newModel =
+                        { model
+                            | wantedHashtags = model.wantedInProgress :: model.wantedHashtags
+                            , wantedInProgress = ""
+                        }
+                in
+                    lean newModel model.wingedness
             else
                 ( model, Cmd.none )
 
         DeleteHashtag hashtag ->
-            {- TODO should make a req for new embeds -}
-            ( { model | wantedHashtags = List.filter (\h -> h /= hashtag) model.wantedHashtags }, Cmd.none )
+            let
+                newModel =
+                    { model | wantedHashtags = List.filter (\h -> h /= hashtag) model.wantedHashtags }
+            in
+                lean newModel model.wingedness
+
+        EmbedEnded _ ->
+            let
+                newIndex =
+                    model.currentEmbed + 1
+
+                uri =
+                    case (Array.get newIndex model.embeds) of
+                        Just embed ->
+                            "/stream/" ++ embed.id
+
+                        Nothing ->
+                            ""
+            in
+                ( { model
+                      | currentEmbed = newIndex
+                      , currentUri = uri
+                  }
+                , playVideo uri
+                )
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Phoenix.Socket.listen model.phxSocket PhoenixMsg
+    Sub.batch
+        [ Phoenix.Socket.listen model.phxSocket PhoenixMsg
+        , videoEnded EmbedEnded
+        ]
 
 
 joinChannel : Cmd Msg
@@ -177,6 +263,76 @@ onKeyDown tagger =
     on "keydown" (Decode.map tagger keyCode)
 
 
+wingString : Wingedness -> String
+wingString wingedness =
+    case wingedness of
+        BothWing ->
+            "both"
+
+        RightWing ->
+            "right"
+
+        LeftWing ->
+            "left"
+
+        NoWing ->
+            "none"
+
+
+lean : Model -> Wingedness -> ( Model, Cmd Msg )
+lean model wingedness =
+    case wingedness of
+        NoWing ->
+            ( { model
+                | wingedness = wingedness
+                , embeds = Array.empty
+                , currentEmbed = 0
+                , currentUri = ""
+              }
+            , playVideo ""
+            )
+
+        _ ->
+            let
+                wingStr =
+                    wingString wingedness
+
+                payload =
+                    Encode.object
+                        [ ( "wingedness", Encode.string wingStr )
+                        , ( "hashtags", Encode.list (List.map Encode.string model.wantedHashtags) )
+                        ]
+
+                phxPush =
+                    Phoenix.Push.init "embeds" "player:lobby"
+                        |> Phoenix.Push.withPayload payload
+                        |> Phoenix.Push.onOk PopulateEmbeds
+
+                ( phxSocket, phxCmd ) =
+                    Phoenix.Socket.push phxPush model.phxSocket
+            in
+                ( { model
+                    | wingedness = wingedness
+                    , phxSocket = phxSocket
+                  }
+                , Cmd.map PhoenixMsg phxCmd
+                )
+
+
+
+-- incoming port
+
+
+port videoEnded : (Bool -> msg) -> Sub msg
+
+
+
+-- outgoing port, start the video
+
+
+port playVideo : String -> Cmd msg
+
+
 
 ---- VIEW ----
 
@@ -184,6 +340,14 @@ onKeyDown tagger =
 drawJumbotron : Model -> Html Msg
 drawJumbotron model =
     let
+        hideVideo =
+            case model.wingedness of
+                NoWing ->
+                    True
+
+                _ ->
+                    False
+
         internals =
             case model.wingedness of
                 NoWing ->
@@ -203,9 +367,26 @@ drawJumbotron model =
     in
         div
             [ id "jumbotron"
-            , class "text-center"
+            , class "text-center w-full"
             ]
-            internals
+            (internals
+                ++ [ video
+                        [ id "theater"
+                        , attribute "preload" "auto"
+                        , attribute "controls" "true"
+                        , classList
+                            [ ( "rounded w-full", True )
+                            , ( "hidden", hideVideo )
+                            ]
+                        ]
+                        [ source
+                            [ attribute "src" model.currentUri
+                            , type_ "video/mp4"
+                            ]
+                            []
+                        ]
+                   ]
+            )
 
 
 drawLeft : Model -> Html Msg
