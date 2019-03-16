@@ -26,7 +26,7 @@ type Wingedness
 
 type alias Embed =
     { hashtags : List String
-    , id : Int
+    , id : String
     , handle_name : String
     }
 
@@ -35,7 +35,7 @@ decodeEmbed : Decode.Decoder Embed
 decodeEmbed =
     Pipeline.decode Embed
         |> Pipeline.required "hashtags" (Decode.list Decode.string)
-        |> Pipeline.required "id" (Decode.int)
+        |> Pipeline.required "id" (Decode.string)
         |> Pipeline.required "handle_name" (Decode.string)
 
 
@@ -49,6 +49,7 @@ type alias Model =
     , phxSocket : Phoenix.Socket.Socket Msg
     , embeds : Array Embed
     , currentEmbed : Int
+    , currentUri : String
     , wingedness : Wingedness
     , wantedHashtags : List String
     , wantedInProgress : String
@@ -72,8 +73,9 @@ init flags =
         model =
             { hashtags = []
             , phxSocket = initSocket
-            , embeds = Array.fromList []
+            , embeds = Array.empty
             , currentEmbed = 0
+            , currentUri = ""
             , wingedness = NoWing
             , wantedHashtags = []
             , wantedInProgress = ""
@@ -96,6 +98,7 @@ type Msg
     | StartHashtag String
     | KeyDown Int
     | DeleteHashtag String
+    | EmbedEnded Bool
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -137,13 +140,29 @@ update msg model =
             let
                 msg =
                     Decode.decodeValue (Decode.field "embeds" embedListDecoder) raw
-            in
-                case msg of
-                    Ok message ->
-                        ( { model | embeds = Array.fromList message }, Cmd.none )
 
-                    Err error ->
-                        ( model, Cmd.none )
+                embeds =
+                    case msg of
+                        Ok message ->
+                            Array.fromList message
+
+                        Err error ->
+                            Array.empty
+
+                uri =
+                    case (Array.get model.currentEmbed embeds) of
+                        Just embed ->
+                            "/stream/" ++ embed.id
+
+                        Nothing ->
+                            "/stream/-1"
+            in
+                ( { model
+                    | embeds = embeds
+                    , currentUri = uri
+                  }
+                , playVideo uri
+                )
 
         TouchLeft ->
             let
@@ -204,10 +223,20 @@ update msg model =
             in
                 lean newModel model.wingedness
 
+        EmbedEnded _ ->
+            let
+                newIndex =
+                    model.currentEmbed + 1
+            in
+                ( { model | currentEmbed = newIndex }, Cmd.none )
+
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Phoenix.Socket.listen model.phxSocket PhoenixMsg
+    [ Phoenix.Socket.listen model.phxSocket PhoenixMsg
+    , videoEnded EmbedEnded
+    ]
+        |> Sub.batch
 
 
 joinChannel : Cmd Msg
@@ -243,10 +272,11 @@ lean model wingedness =
         NoWing ->
             ( { model
                 | wingedness = wingedness
-                , embeds = Array.fromList []
+                , embeds = Array.empty
                 , currentEmbed = 0
+                , currentUri = ""
               }
-            , Cmd.none
+            , playVideo ""
             )
 
         _ ->
@@ -277,12 +307,34 @@ lean model wingedness =
 
 
 
+-- incoming port
+
+
+port videoEnded : (Bool -> msg) -> Sub msg
+
+
+
+-- outgoing port, start the video
+
+
+port playVideo : String -> Cmd msg
+
+
+
 ---- VIEW ----
 
 
 drawJumbotron : Model -> Html Msg
 drawJumbotron model =
     let
+        hideVideo =
+            case model.wingedness of
+                NoWing ->
+                    True
+
+                _ ->
+                    False
+
         internals =
             case model.wingedness of
                 NoWing ->
@@ -302,9 +354,26 @@ drawJumbotron model =
     in
         div
             [ id "jumbotron"
-            , class "text-center"
+            , class "text-center w-full"
             ]
-            internals
+            (internals
+                ++ [ video
+                        [ id "theater"
+                        , attribute "preload" "auto"
+                        , attribute "controls" "true"
+                        , classList
+                            [ ( "rounded w-full", True )
+                            , ( "hidden", hideVideo )
+                            ]
+                        ]
+                        [ source
+                            [ attribute "src" model.currentUri
+                            , type_ "video/mp4"
+                            ]
+                            []
+                        ]
+                   ]
+            )
 
 
 drawLeft : Model -> Html Msg

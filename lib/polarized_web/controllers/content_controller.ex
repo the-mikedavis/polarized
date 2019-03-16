@@ -8,7 +8,6 @@ defmodule PolarizedWeb.ContentController do
 
   def stream(%{req_headers: headers} = conn, %{"id" => id}) do
     id
-    |> String.to_integer()
     |> @content_server.get()
     |> case do
       %Embed{} = embed ->
