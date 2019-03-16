@@ -41,6 +41,10 @@ defmodule Polarized.Content.ServerTest do
 
     @effects
     |> expect(:download_file, 11, fn _, dest ->
+      File.cwd!()
+      |> Path.join("data")
+      |> File.mkdir_p!()
+
       [File.cwd!(), "data", "video.mp4"]
       |> Path.join()
       |> File.cp!(dest)
