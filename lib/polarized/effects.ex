@@ -8,6 +8,8 @@ defmodule Polarized.Effects do
   alias __MODULE__.Behaviour
   @behaviour Behaviour
 
+  alias Polarized.Repo
+
   @impl Behaviour
   def download_file(url, dest) do
     file = File.stream!(dest, [:write, :binary])
@@ -58,5 +60,28 @@ defmodule Polarized.Effects do
           Logger.error("Could not create #{table_name} table. Reason: #{inspect(reason)}")
       end
     end
+  end
+
+  def seed do
+    {:ok, users} = Repo.list_users_impl()
+
+    if length(users) == 0 do
+      %{username: "adminimum", password: "pleasechangethis"}
+      |> Repo.ensure_user_inserted_impl()
+      |> case do
+        {:ok, :inserted} ->
+          Logger.info("Admin user added.")
+
+          # wait for changes to mnesia to propagate to disk
+          Process.sleep(2_000)
+
+        {:error, reason} ->
+          Logger.error("Insertion failed! #{inspect(reason)}")
+      end
+    else
+      Logger.debug("Admin user was already inserted.")
+    end
+
+    :ok
   end
 end

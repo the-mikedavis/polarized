@@ -52,29 +52,41 @@ defmodule Polarized.Repo do
 
     Polarized.Effects.setup_tables(@tables)
 
+    Polarized.Effects.seed()
+
     :ok = :mnesia.wait_for_tables(:mnesia.system_info(:local_tables), 5_000)
 
     {:ok, args}
   end
 
-  private do
-    @spec ensure_user_inserted_impl(%{username: String.t(), password: String.t()}) ::
-            {:ok, :unchanged | :inserted} | {:error, any()}
-    defp ensure_user_inserted_impl(%{username: username, password: password}) do
-      read_user = fn -> :mnesia.read({Admin, username}) end
+  @spec ensure_user_inserted_impl(%{username: String.t(), password: String.t()}) ::
+  {:ok, :unchanged | :inserted} | {:error, any()}
+  def ensure_user_inserted_impl(%{username: username, password: password}) do
+    read_user = fn -> :mnesia.read({Admin, username}) end
 
-      with {:atomic, []} <- :mnesia.transaction(read_user),
-           hashed_password <- Crypto.hashpwsalt(password),
+    with {:atomic, []} <- :mnesia.transaction(read_user),
+         hashed_password <- Crypto.hashpwsalt(password),
            write_user <- fn -> :mnesia.write({Admin, username, hashed_password}) end,
-           {:atomic, :ok} <- :mnesia.transaction(write_user) do
-        :ok = :mnesia.wait_for_tables([Admin], 5_000)
-        {:ok, :inserted}
-      else
-        {:atomic, [{Admin, ^username, _password}]} -> {:ok, :unchanged}
-        {:aborted, reason} -> {:error, reason}
-      end
+    {:atomic, :ok} <- :mnesia.transaction(write_user) do
+      :ok = :mnesia.wait_for_tables([Admin], 5_000)
+      {:ok, :inserted}
+    else
+      {:atomic, [{Admin, ^username, _password}]} -> {:ok, :unchanged}
+    {:aborted, reason} -> {:error, reason}
     end
+  end
 
+  @spec list_users_impl() :: {:ok, [String.t()]} | {:error, any()}
+  def list_users_impl do
+    :ok = :mnesia.wait_for_tables([Admin], 5_000)
+
+    case :mnesia.transaction(fn -> :mnesia.all_keys(Admin) end) do
+      {:atomic, users} -> {:ok, users}
+      {:aborted, reason} -> {:error, reason}
+    end
+  end
+
+  private do
     @spec remove_user_impl(String.t()) :: :ok | {:error, any()}
     defp remove_user_impl(username) do
       remove_user = fn -> :mnesia.delete({Admin, username}) end
@@ -120,16 +132,6 @@ defmodule Polarized.Repo do
         else
           [] -> :mnesia.write({Admin, user, hash})
         end
-      end
-    end
-
-    @spec list_users_impl() :: {:ok, [String.t()]} | {:error, any()}
-    defp list_users_impl do
-      :ok = :mnesia.wait_for_tables([Admin], 5_000)
-
-      case :mnesia.transaction(fn -> :mnesia.all_keys(Admin) end) do
-        {:atomic, users} -> {:ok, users}
-        {:aborted, reason} -> {:error, reason}
       end
     end
 
