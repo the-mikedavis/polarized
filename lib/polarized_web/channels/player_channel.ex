@@ -22,6 +22,7 @@ defmodule PolarizedWeb.PlayerChannel do
       |> to_query()
       |> @content_server.request(hashtags)
       |> Enum.map(&embed_to_map/1)
+      |> Enum.shuffle()
 
     {:reply, {:ok, %{embeds: embeds}}, socket}
   end
@@ -36,9 +37,10 @@ defmodule PolarizedWeb.PlayerChannel do
   end
 
   @spec embed_to_map(%Embed{}) :: map()
-  defp embed_to_map(%Embed{handle: %{name: name}} = embed) do
+  defp embed_to_map(%Embed{handle: %{name: name, profile_picture_url: prof}} = embed) do
     embed
     |> Map.take([:hashtags, :id])
     |> Map.put(:handle_name, name)
+    |> Map.put(:profile_picture_url, prof)
   end
 end

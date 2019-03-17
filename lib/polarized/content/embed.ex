@@ -54,7 +54,11 @@ defmodule Polarized.Content.Embed do
 
     @spec parse_tweet(%Tweet{}, %Handle{}) :: %__MODULE__{}
     defp parse_tweet(
-           %Tweet{id_str: id, entities: %{hashtags: hashtags}} = tweet,
+           %Tweet{
+             id_str: id,
+             entities: %{hashtags: hashtags},
+             user: %{profile_image_url: prof_url}
+           } = tweet,
            %Handle{} = handle
          ) do
       hashtags = Enum.map(hashtags, & &1.text)
@@ -63,7 +67,7 @@ defmodule Polarized.Content.Embed do
 
       %__MODULE__{
         id: id,
-        handle: handle,
+        handle: %Handle{handle | profile_picture_url: prof_url},
         source: source,
         source_url: source_url,
         hashtags: hashtags

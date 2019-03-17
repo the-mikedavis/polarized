@@ -28,6 +28,7 @@ type alias Embed =
     { hashtags : List String
     , id : String
     , handle_name : String
+    , profile_picture_url : String
     }
 
 
@@ -37,6 +38,7 @@ decodeEmbed =
         |> Pipeline.required "hashtags" (Decode.list Decode.string)
         |> Pipeline.required "id" (Decode.string)
         |> Pipeline.required "handle_name" (Decode.string)
+        |> Pipeline.required "profile_picture_url" (Decode.string)
 
 
 embedListDecoder : Decode.Decoder (List Embed)
@@ -237,8 +239,8 @@ update msg model =
                             ""
             in
                 ( { model
-                      | currentEmbed = newIndex
-                      , currentUri = uri
+                    | currentEmbed = newIndex
+                    , currentUri = uri
                   }
                 , playVideo uri
                 )
@@ -340,30 +342,48 @@ port playVideo : String -> Cmd msg
 drawJumbotron : Model -> Html Msg
 drawJumbotron model =
     let
-        hideVideo =
+        ( hideVideo, internals, profile ) =
             case model.wingedness of
                 NoWing ->
-                    True
+                    ( True
+                    , [ p []
+                            [ text "Polarized TV generates daily broadcasts from"
+                            ]
+                      , p []
+                            [ text "video content collected from"
+                            ]
+                      , p []
+                            [ text "right or left leaning Twitter users"
+                            ]
+                      ]
+                    , []
+                    )
 
                 _ ->
-                    False
+                    ( False
+                    , []
+                    , case Array.get model.currentEmbed model.embeds of
+                        Just embed ->
+                            [ div
+                                [ class "text-right pl-2 pt-1"
+                                , id "handle"
+                                ]
+                                [ span
+                                    [ class "mr-3 handle-name"
+                                    ]
+                                    [ text embed.handle_name
+                                    ]
+                                , img
+                                    [ attribute "src" embed.profile_picture_url
+                                    , class "circular"
+                                    ]
+                                    []
+                                ]
+                            ]
 
-        internals =
-            case model.wingedness of
-                NoWing ->
-                    [ p []
-                        [ text "Polarized TV generates daily broadcasts from"
-                        ]
-                    , p []
-                        [ text "video content collected from"
-                        ]
-                    , p []
-                        [ text "right or left leaning Twitter users"
-                        ]
-                    ]
-
-                _ ->
-                    []
+                        Nothing ->
+                            []
+                    )
     in
         div
             [ id "jumbotron"
@@ -386,6 +406,7 @@ drawJumbotron model =
                             []
                         ]
                    ]
+                ++ profile
             )
 
 
