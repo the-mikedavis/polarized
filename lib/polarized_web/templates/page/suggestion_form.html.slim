@@ -7,8 +7,10 @@ div.w-full.mt-6
 
   = form_for @changeset, Routes.page_path(@conn, :create), [class: "flex w-full bg-white px-8 pt-6 pb-8 mb-4"], fn f ->
     div class="w-1/2"
-      = label(f, :name, class: "inline text-black text-sm font-bold mr-2")
-      = text_input(f, :name, class: "inline appearance-none border py-2 px-3 leading-tight focus:outline-none focus:shadow-outline")
+      = label(f, :name, "Twitter Handle", class: "inline text-black text-sm font-bold mr-2")
+      div.inline-block.rounded.bg-grey-light
+        span#at-symbol @
+        = text_input(f, :name, class: "inline appearance-none border py-2 px-3 leading-tight focus:outline-none focus:shadow-outline", placeholder: "username")
       = error_tag(f, :name)
 
     div class="w-1/3"

@@ -575,7 +575,7 @@ drawControlPanel model =
     in
         div
             [ id "control-panel"
-            , class "bg-grey px-5 pt-5"
+            , class "bg-grey-light px-5 pt-5"
             ]
             [ p
                 [ class "text-center text-grey-darker pb-5"
