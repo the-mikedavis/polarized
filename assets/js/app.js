@@ -14,15 +14,17 @@ if (player) {
     const videoElem = document.getElementById('theater')
 
     app.ports.playVideo.subscribe(function (uri) {
-      let videoElem = document.getElementById('theater');
-      setTimeout(() => {
-        videoElem.load();
-        videoElem.play();
+      if (uri != "") {
+        let videoElem = document.getElementById('theater');
+        setTimeout(() => {
+          videoElem.load();
+          videoElem.play();
 
-        videoElem.addEventListener('ended', function () {
-          app.ports.videoEnded.send(true);
-        });
-      }, 100);
+          videoElem.addEventListener('ended', function () {
+            app.ports.videoEnded.send(true);
+          });
+        }, 100);
+      }
     });
   });
 }
