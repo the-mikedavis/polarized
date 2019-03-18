@@ -7,4 +7,8 @@ config :polarized, PolarizedWeb.Endpoint,
   cache_static_manifest: "priv/static/cache_manifest.json",
   server: true
 
+config :extwitter, :oauth,
+  consumer_key: "${TWITTER_CONSUMER_KEY}",
+  consumer_secret: "${TWITTER_CONSUMER_SECRET}",
+
 config :logger, level: :info
