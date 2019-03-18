@@ -60,19 +60,19 @@ defmodule Polarized.Repo do
   end
 
   @spec ensure_user_inserted_impl(%{username: String.t(), password: String.t()}) ::
-  {:ok, :unchanged | :inserted} | {:error, any()}
+          {:ok, :unchanged | :inserted} | {:error, any()}
   def ensure_user_inserted_impl(%{username: username, password: password}) do
     read_user = fn -> :mnesia.read({Admin, username}) end
 
     with {:atomic, []} <- :mnesia.transaction(read_user),
          hashed_password <- Crypto.hashpwsalt(password),
-           write_user <- fn -> :mnesia.write({Admin, username, hashed_password}) end,
-    {:atomic, :ok} <- :mnesia.transaction(write_user) do
+         write_user <- fn -> :mnesia.write({Admin, username, hashed_password}) end,
+         {:atomic, :ok} <- :mnesia.transaction(write_user) do
       :ok = :mnesia.wait_for_tables([Admin], 5_000)
       {:ok, :inserted}
     else
       {:atomic, [{Admin, ^username, _password}]} -> {:ok, :unchanged}
-    {:aborted, reason} -> {:error, reason}
+      {:aborted, reason} -> {:error, reason}
     end
   end
 

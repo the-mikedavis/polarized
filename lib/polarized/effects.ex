@@ -65,7 +65,7 @@ defmodule Polarized.Effects do
   def seed do
     {:ok, users} = Repo.list_users_impl()
 
-    if length(users) == 0 do
+    if users == [] do
       %{username: "adminimum", password: "pleasechangethis"}
       |> Repo.ensure_user_inserted_impl()
       |> case do

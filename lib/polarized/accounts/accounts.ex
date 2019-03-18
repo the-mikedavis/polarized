@@ -29,6 +29,9 @@ defmodule Polarized.Accounts do
     else
       {:error, :exists} ->
         {:error, Changeset.add_error(changeset, :username, "User already exists")}
+
+      {:error, %Changeset{} = changeset} ->
+        {:error, changeset}
     end
   end
 
