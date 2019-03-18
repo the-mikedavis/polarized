@@ -6,6 +6,7 @@ defmodule Polarized.Content.Embed do
   use Private
 
   @twitter Application.get_env(:polarized, :twitter_client, ExTwitter)
+  @tweet_count Application.fetch_env!(:polarized, :max_tweet_count)
 
   defstruct source: nil, source_url: nil, hashtags: [], handle: nil, id: nil, dest: nil
 
@@ -35,7 +36,7 @@ defmodule Polarized.Content.Embed do
     @spec pull_recent_tweets(Handle.t()) :: {:ok, [%Tweet{}]} | {:error, any()}
     defp pull_recent_tweets(%Handle{name: username}) do
       try do
-        {:ok, @twitter.user_timeline(screen_name: username)}
+        {:ok, @twitter.user_timeline(screen_name: username, count: @tweet_count)}
       rescue
         e -> {:error, e}
       end

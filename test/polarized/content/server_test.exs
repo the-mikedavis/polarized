@@ -36,7 +36,7 @@ defmodule Polarized.Content.ServerTest do
 
   test "megatest muahahaha", c do
     @twitter
-    |> expect(:user_timeline, fn [screen_name: _] -> c.tweets end)
+    |> expect(:user_timeline, fn _opts -> c.tweets end)
     |> allow(self(), Server)
 
     @effects

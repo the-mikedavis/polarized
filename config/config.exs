@@ -31,6 +31,9 @@ config :extwitter, :oauth,
 config :mnesia,
   dir: 'priv/data/mnesia-#{Mix.env()}'
 
+config :polarized,
+  max_tweet_count: 100
+
 config :phoenix, :template_engines,
   slim: PhoenixSlime.Engine,
   slime: PhoenixSlime.Engine
