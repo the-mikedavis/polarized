@@ -9,6 +9,6 @@ config :polarized, PolarizedWeb.Endpoint,
 
 config :extwitter, :oauth,
   consumer_key: "${TWITTER_CONSUMER_KEY}",
-  consumer_secret: "${TWITTER_CONSUMER_SECRET}",
+  consumer_secret: "${TWITTER_CONSUMER_SECRET}"
 
 config :logger, level: :info
