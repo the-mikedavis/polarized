@@ -8,8 +8,6 @@ const player = document.getElementById('player')
 if (player) {
   const app = Player.embed(player, {uri: buildSocketUri()})
 
-  window.app = app;
-
   window.addEventListener('load', function () {
     const videoElem = document.getElementById('theater')
 
