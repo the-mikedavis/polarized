@@ -98,7 +98,7 @@ defmodule Polarized.Content.Server do
     @spec fetch_state(state()) :: state()
     defp fetch_state(prior_state) do
       for {_id, embed} <- prior_state do
-        :ok = File.rm!(embed.dest)
+        unless embed.dest == nil, do: :ok = File.rm!(embed.dest)
       end
 
       fetch_state()
