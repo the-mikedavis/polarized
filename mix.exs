@@ -122,7 +122,7 @@ defmodule Polarized.MixProject do
 
     [assets, "node_modules", ".bin", "webpack"]
     |> Path.join()
-    |> System.cmd(["--production"], cd: assets)
+    |> System.cmd(["--production"], cd: assets, into: IO.stream(:stdio, :line))
 
     [
       {"phx.digest", []},
