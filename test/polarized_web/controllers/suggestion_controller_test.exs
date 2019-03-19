@@ -34,17 +34,17 @@ defmodule PolarizedWeb.SuggestionControllerTest do
       assert html_response(conn, 200) =~ username
     end
 
-    test "denying a suggestion", %{conn: conn, username: username} = c do
-      params = %{"name" => username}
-      conn = put(conn, Routes.suggestion_path(conn, :deny, c.record), params)
+    test "denying a suggestion", %{conn: conn, username: username} do
+      params = %{username => "true"}
+      conn = put(conn, Routes.suggestion_path(conn, :deny), params)
       assert html_response(conn, 302) =~ "/admin/suggestions"
     end
 
-    test "approving a suggestion", %{conn: conn, username: username} = c do
+    test "approving a suggestion", %{conn: conn, username: username} do
       expect(@content_server, :refresh, fn -> :ok end)
 
-      params = %{"name" => username}
-      conn = put(conn, Routes.suggestion_path(conn, :approve, c.record), params)
+      params = %{username => "true"}
+      conn = put(conn, Routes.suggestion_path(conn, :approve), params)
       assert html_response(conn, 302) =~ "/admin/suggestions"
 
       {:ok, follows} = Repo.list_follows()
@@ -78,8 +78,8 @@ defmodule PolarizedWeb.SuggestionControllerTest do
     end
 
     test "deleting a follower", c do
-      params = %{"name" => c.username}
-      conn = delete(c.conn, Routes.suggestion_path(c.conn, :delete, c.record), params)
+      params = %{c.username => "true"}
+      conn = delete(c.conn, Routes.suggestion_path(c.conn, :delete), params)
       assert html_response(conn, 302) =~ "/admin/suggestions"
 
       {:ok, follows} = Repo.list_follows()

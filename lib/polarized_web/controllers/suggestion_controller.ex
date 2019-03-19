@@ -16,25 +16,37 @@ defmodule PolarizedWeb.SuggestionController do
     render(conn, "index.html", suggestions: suggestions, follows: follows)
   end
 
-  def approve(conn, %{"name" => name}) do
-    :ok = Repo.follow_handle(name)
+  def approve(conn, params) do
+    params
+    |> parse_batch()
+    |> Enum.each(&Repo.follow_handle/1)
 
     :ok = @content_server.refresh()
 
     redirect(conn, to: Routes.suggestion_path(conn, :index))
   end
 
-  def deny(conn, %{"name" => name}) do
-    {:ok, ^name} = Repo.remove_handle(name)
+  def deny(conn, params) do
+    params
+    |> parse_batch()
+    |> Enum.each(&Repo.remove_handle/1)
 
     redirect(conn, to: Routes.suggestion_path(conn, :index))
   end
 
-  def delete(conn, %{"name" => name}) do
-    :ok = Repo.unfollow_handle(name)
+  def delete(conn, params) do
+    params
+    |> parse_batch()
+    |> Enum.each(&Repo.unfollow_handle/1)
 
-    conn
-    |> put_flash(:info, "Successfully unfollowed #{name}.")
-    |> redirect(to: Routes.suggestion_path(conn, :index))
+    redirect(conn, to: Routes.suggestion_path(conn, :index))
+  end
+
+  @spec parse_batch(%{String.t() => String.t()}) :: [String.t()]
+  defp parse_batch(params) do
+    params
+    |> Map.drop(["_csrf_token", "_method", "_utf8"])
+    |> Enum.filter(fn {_handle, delete?} -> delete? == "true" end)
+    |> Enum.map(fn {handle, _delete?} -> handle end)
   end
 end

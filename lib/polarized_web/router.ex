@@ -32,8 +32,8 @@ defmodule PolarizedWeb.Router do
 
     resources "/user", UserController
     get "/suggestions", SuggestionController, :index
-    put "/suggestions/approve/:name", SuggestionController, :approve
-    put "/suggestions/deny/:name", SuggestionController, :deny
-    delete "/suggestions/delete/:name", SuggestionController, :delete
+    put "/suggestions/approve", SuggestionController, :approve
+    put "/suggestions/deny", SuggestionController, :deny
+    delete "/suggestions/delete", SuggestionController, :delete
   end
 end
