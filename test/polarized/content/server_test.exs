@@ -40,7 +40,7 @@ defmodule Polarized.Content.ServerTest do
     |> allow(self(), Server)
 
     @effects
-    |> expect(:download_file, 11, fn _, dest ->
+    |> stub(:download_file, fn _, dest ->
       File.cwd!()
       |> Path.join("data")
       |> File.mkdir_p!()
