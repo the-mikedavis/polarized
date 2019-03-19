@@ -29,6 +29,8 @@ type alias Embed =
     , id : String
     , handle_name : String
     , profile_picture_url : String
+    , text : String
+    , link : String
     }
 
 
@@ -39,6 +41,8 @@ decodeEmbed =
         |> Pipeline.required "id" (Decode.string)
         |> Pipeline.required "handle_name" (Decode.string)
         |> Pipeline.required "profile_picture_url" (Decode.string)
+        |> Pipeline.required "text" (Decode.string)
+        |> Pipeline.required "link" (Decode.string)
 
 
 embedListDecoder : Decode.Decoder (List Embed)
@@ -365,19 +369,39 @@ drawJumbotron model =
                     , case Array.get model.currentEmbed model.embeds of
                         Just embed ->
                             [ div
-                                [ class "text-right pl-2 pt-1"
-                                , id "handle"
+                                [ class ""
                                 ]
-                                [ span
-                                    [ class "mr-3 handle-name"
+                                [ div
+                                    [ class "text-right pl-2 pt-1"
+                                    , id "handle"
                                     ]
-                                    [ text embed.handle_name
+                                    [ a
+                                        [ class "mr-3 handle-name"
+                                        , href ("https://twitter.com/" ++ embed.handle_name)
+                                        ]
+                                        [ text embed.handle_name
+                                        ]
+                                    , img
+                                        [ attribute "src" embed.profile_picture_url
+                                        , class "circular"
+                                        ]
+                                        []
                                     ]
-                                , img
-                                    [ attribute "src" embed.profile_picture_url
-                                    , class "circular"
+                                , div
+                                    [ class "text-left pt-4"
                                     ]
-                                    []
+                                    [ p [ class "inline-block"
+                                        ]
+                                        [ a
+                                            [ class "fab fa-twitter mr-3 text-blue hover:text-blue-darker"
+                                            , id "twitter-icon"
+                                            , href embed.link
+                                            , attribute "target" "_blank"
+                                            ]
+                                            []
+                                        , text embed.text
+                                        ]
+                                    ]
                                 ]
                             ]
 
@@ -528,7 +552,7 @@ drawLeftRight model =
     in
         div
             [ id "left-right"
-            , class "my-20 flex justify-between items-start"
+            , class "my-10 flex justify-between items-start"
             ]
             layout
 

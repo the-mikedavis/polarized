@@ -8,7 +8,14 @@ defmodule Polarized.Content.Embed do
   @twitter Application.get_env(:polarized, :twitter_client, ExTwitter)
   @tweet_count Application.fetch_env!(:polarized, :max_tweet_count)
 
-  defstruct source: nil, source_url: nil, hashtags: [], handle: nil, id: nil, dest: nil
+  defstruct source: nil,
+            source_url: nil,
+            hashtags: [],
+            handle: nil,
+            id: nil,
+            dest: nil,
+            text: nil,
+            link: nil
 
   alias Polarized.Content.Handle
   alias ExTwitter.Model.Tweet
@@ -58,7 +65,8 @@ defmodule Polarized.Content.Embed do
            %Tweet{
              id_str: id,
              entities: %{hashtags: hashtags},
-             user: %{profile_image_url: prof_url}
+             user: %{profile_image_url: prof_url},
+             text: text
            } = tweet,
            %Handle{} = handle
          ) do
@@ -66,12 +74,20 @@ defmodule Polarized.Content.Embed do
 
       {source, source_url} = parse_source(tweet)
 
+      [text, link_id | _] = String.split(text, "https://t.co/")
+
+      text = String.trim_trailing(text)
+
+      link = "https://t.co/" <> link_id
+
       %__MODULE__{
         id: id,
         handle: %Handle{handle | profile_picture_url: prof_url},
         source: source,
         source_url: source_url,
-        hashtags: hashtags
+        hashtags: hashtags,
+        text: text,
+        link: link
       }
     end
 

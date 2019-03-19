@@ -39,7 +39,7 @@ defmodule PolarizedWeb.PlayerChannel do
   @spec embed_to_map(%Embed{}) :: map()
   defp embed_to_map(%Embed{handle: %{name: name, profile_picture_url: prof}} = embed) do
     embed
-    |> Map.take([:hashtags, :id])
+    |> Map.take([:hashtags, :id, :text, :link])
     |> Map.put(:handle_name, name)
     |> Map.put(:profile_picture_url, prof)
   end
