@@ -601,6 +601,12 @@ drawControlPanel model =
                     [ id "available-hashtags"
                     ]
                     availableHashtags
+                , button
+                    [ class "bg-blue text-white w-1/4 font-bold px-4 py-2 focus:outline-none focus:shadow-outline hover:bg-blue-darker"
+                    , onClick (KeyDown 13)
+                    ]
+                    [ text "Add filter"
+                    ]
                 ]
             , div
                 [ class "flex flex-wrap -mx-2 pr-2 py-5"
