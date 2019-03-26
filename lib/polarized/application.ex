@@ -10,7 +10,8 @@ defmodule Polarized.Application do
     children = [
       Repo,
       PolarizedWeb.Endpoint,
-      ContentServer
+      ContentServer,
+      Polarized.Scheduler
     ]
 
     opts = [strategy: :one_for_one, name: Polarized.Supervisor]
