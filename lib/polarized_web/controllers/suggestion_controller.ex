@@ -17,11 +17,11 @@ defmodule PolarizedWeb.SuggestionController do
   end
 
   def approve(conn, params) do
-    params
-    |> parse_batch()
-    |> Enum.each(&Repo.follow_handle/1)
+    names = parse_batch(params)
 
-    :ok = @content_server.refresh()
+    Enum.each(names, &Repo.follow_handle/1)
+
+    Enum.each(names, &@content_server.add/1)
 
     redirect(conn, to: Routes.suggestion_path(conn, :index))
   end
@@ -35,9 +35,11 @@ defmodule PolarizedWeb.SuggestionController do
   end
 
   def delete(conn, params) do
-    params
-    |> parse_batch()
-    |> Enum.each(&Repo.unfollow_handle/1)
+    names = parse_batch(params)
+
+    Enum.each(names, &Repo.unfollow_handle/1)
+
+    Enum.each(names, &@content_server.remove/1)
 
     redirect(conn, to: Routes.suggestion_path(conn, :index))
   end

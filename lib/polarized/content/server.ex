@@ -2,7 +2,7 @@ defmodule Polarized.Content.Server do
   use GenServer
   use Private
 
-  alias Polarized.Content
+  alias Polarized.{Content, Repo}
   alias Content.{Embed, Handle}
   alias __MODULE__.Behaviour
 
@@ -44,6 +44,12 @@ defmodule Polarized.Content.Server do
 
   def enrich(embed), do: GenServer.cast(__MODULE__, {:enrich, embed})
 
+  @impl Behaviour
+  def add(handle), do: GenServer.cast(__MODULE__, {:add, handle})
+
+  @impl Behaviour
+  def remove(handle), do: GenServer.cast(__MODULE__, {:remove, handle})
+
   @impl GenServer
   def handle_call({:request, right_wing?, hashtags}, _from, state) do
     embeds =
@@ -74,6 +80,28 @@ defmodule Polarized.Content.Server do
   end
 
   def handle_cast(:refresh, state), do: {:noreply, fetch_state(state)}
+
+  def handle_cast({:add, handle}, state) do
+    {:ok, %Handle{} = user} = Repo.get_follow(handle)
+
+    embeds = Embed.fetch(user)
+
+    new_state =
+      Enum.reduce(embeds, state, fn embed, acc ->
+        Map.put(acc, embed.id, embed)
+      end)
+
+    {:noreply, new_state}
+  end
+
+  def handle_cast({:remove, handle}, state) do
+    {to_remove, others} =
+      Enum.split_with(state, fn {_id, embed} -> embed.handle.name == handle end)
+
+    Enum.each(to_remove, fn {_id, embed} -> File.rm!(embed.dest) end)
+
+    {:noreply, Enum.into(others, %{})}
+  end
 
   @impl GenServer
   def handle_info(:refresh, state), do: {:noreply, fetch_state(state)}

@@ -7,4 +7,6 @@ defmodule Polarized.Content.Server.Behaviour do
   @callback list_hashtags() :: [String.t()]
   @callback get(integer()) :: %Embed{} | nil
   @callback refresh() :: :ok
+  @callback add(String.t()) :: :ok
+  @callback remove(String.t()) :: :ok
 end

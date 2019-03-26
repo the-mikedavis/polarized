@@ -36,7 +36,7 @@ defmodule Polarized.Content.ServerTest do
 
   test "megatest muahahaha", c do
     @twitter
-    |> expect(:user_timeline, fn _opts -> c.tweets end)
+    |> expect(:user_timeline, 2, fn _opts -> c.tweets end)
     |> allow(self(), Server)
 
     @effects
@@ -64,6 +64,18 @@ defmodule Polarized.Content.ServerTest do
     for embed <- Server.request(:_, ["FNS"]) do
       assert "FNS" in embed.hashtags
     end
+
+    Server.remove(c.handle.name)
+
+    Process.sleep(50)
+
+    assert %{} == :sys.get_state(Server)
+
+    Server.add(c.handle.name)
+
+    Process.sleep(50)
+
+    assert ["FNS", "Trade"] = Server.list_hashtags()
 
     Process.sleep(100)
   end

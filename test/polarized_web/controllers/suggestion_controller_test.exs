@@ -41,7 +41,7 @@ defmodule PolarizedWeb.SuggestionControllerTest do
     end
 
     test "approving a suggestion", %{conn: conn, username: username} do
-      expect(@content_server, :refresh, fn -> :ok end)
+      expect(@content_server, :add, fn _ -> :ok end)
 
       params = %{username => "true"}
       conn = put(conn, Routes.suggestion_path(conn, :approve), params)
@@ -78,6 +78,8 @@ defmodule PolarizedWeb.SuggestionControllerTest do
     end
 
     test "deleting a follower", c do
+      expect(@content_server, :remove, fn _ -> :ok end)
+
       params = %{c.username => "true"}
       conn = delete(c.conn, Routes.suggestion_path(c.conn, :delete), params)
       assert html_response(conn, 302) =~ "/admin/suggestions"

@@ -19,6 +19,7 @@ defmodule Polarized.Repo do
   call(:insert_handle, &insert_handle_impl/1)
   call(:remove_handle, &remove_handle_impl/1)
   call(:follow_handle, &follow_handle_impl/1)
+  call(:get_follow, &get_follow_impl/1)
   call(:unfollow_handle, &unfollow_handle_impl/1)
 
   def list_users, do: GenServer.call(__MODULE__, :list_users)
@@ -202,7 +203,7 @@ defmodule Polarized.Repo do
       end
     end
 
-    @spec follow_handle_impl(%Handle{}) :: :ok | {:error, any()}
+    @spec follow_handle_impl(String.t()) :: :ok | {:error, any()}
     defp follow_handle_impl(name) do
       follow = fn ->
         with [{Handle, ^name, right_wing} | _] <- :mnesia.read({Handle, name}),
@@ -225,6 +226,20 @@ defmodule Polarized.Repo do
       case :mnesia.transaction(fn -> :mnesia.delete({Follow, name}) end) do
         {:atomic, :ok} -> :ok
         {:aborted, reason} -> {:error, reason}
+      end
+    end
+
+    @spec get_follow_impl(String.t()) :: {:ok, %Handle{} | nil} | {:error, any()}
+    defp get_follow_impl(name) do
+      case :mnesia.transaction(fn -> :mnesia.read({Follow, name}) end) do
+        {:atomic, [{Follow, ^name, right_wing}]} ->
+          {:ok, %Handle{name: name, right_wing: right_wing}}
+
+        {:atomic, _} ->
+          {:ok, nil}
+
+        {:aborted, reason} ->
+          {:error, reason}
       end
     end
   end
