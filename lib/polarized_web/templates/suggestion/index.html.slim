@@ -1,19 +1,4 @@
-h1.text-grey-darker.my-4 Follows
-
-div.bg-white.p-10.shadow
-  div.flex.w-full
-    div class="w-1/6 text-sm font-bold" Select
-    div class="w-1/3 text-sm font-bold" Name
-    div class="w-1/3 text-sm font-bold" Wingedness
-
-  = form_for @conn, Routes.suggestion_path(@conn, :delete), [method: "delete", class: "my-4 w-full"], fn f ->
-    = for follow <- @follows do
-      div.flex
-        div class="w-1/6 h-10"
-          = checkbox(f, String.to_atom(follow.id))
-        div class="w-1/3 h-10" = follow.name
-        div class="w-1/3 h-10" = wingedness(follow)
-    = submit "Remove", class: "bg-red-dark hover:bg-red-darker text-white py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+= render("suggestion_form.html", assigns)
 
 h1.text-grey-darker.my-4 Suggestions
 
@@ -32,3 +17,20 @@ div.bg-white.p-10.shadow
         div class="w-1/3 h-10" = wingedness(suggestion)
     = submit "Approve", formaction: Routes.suggestion_path(@conn, :approve), method: "put", class: "bg-red-dark hover:bg-red-darker text-white py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-4"
     = submit "Deny", formaction: Routes.suggestion_path(@conn, :deny), method: "put", class: "bg-red-dark hover:bg-red-darker text-white py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+
+h1.text-grey-darker.my-4 Follows
+
+div.bg-white.p-10.shadow
+  div.flex.w-full
+    div class="w-1/6 text-sm font-bold" Select
+    div class="w-1/3 text-sm font-bold" Name
+    div class="w-1/3 text-sm font-bold" Wingedness
+
+  = form_for @conn, Routes.suggestion_path(@conn, :delete), [method: "delete", class: "my-4 w-full"], fn f ->
+    = for follow <- @follows do
+      div.flex
+        div class="w-1/6 h-10"
+          = checkbox(f, String.to_atom(follow.id))
+        div class="w-1/3 h-10" = follow.name
+        div class="w-1/3 h-10" = wingedness(follow)
+    = submit "Remove", class: "bg-red-dark hover:bg-red-darker text-white py-2 px-4 rounded focus:outline-none focus:shadow-outline"

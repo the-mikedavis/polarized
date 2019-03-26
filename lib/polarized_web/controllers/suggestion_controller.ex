@@ -2,7 +2,9 @@ defmodule PolarizedWeb.SuggestionController do
   use PolarizedWeb, :controller
 
   alias Polarized.Repo
-  alias Polarized.Content.Server, as: ContentServer
+  alias Polarized.Content
+  alias Content.Handle
+  alias Content.Server, as: ContentServer
 
   @content_server Application.get_env(:polarized, :content_server, ContentServer)
 
@@ -12,8 +14,9 @@ defmodule PolarizedWeb.SuggestionController do
 
     suggestions = Enum.map(handles, fn %{name: name} = handle -> %{handle | id: name} end)
     follows = Enum.map(follows, fn %{name: name} = follow -> %{follow | id: name} end)
+    changeset = Content.change_handle(%Handle{})
 
-    render(conn, "index.html", suggestions: suggestions, follows: follows)
+    render(conn, "index.html", suggestions: suggestions, follows: follows, changeset: changeset)
   end
 
   def approve(conn, params) do

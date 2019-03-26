@@ -4,10 +4,7 @@ defmodule PolarizedWeb.PageController do
   alias Polarized.{Content, Content.Handle}
   alias Ecto.Changeset
 
-  def index(conn, _params) do
-    changeset = Content.change_handle(%Handle{})
-    render(conn, "index.html", changeset: changeset)
-  end
+  def index(conn, _params), do: render(conn, "index.html")
 
   def credits(conn, _params), do: render(conn, "credits.html")
 
