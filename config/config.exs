@@ -43,7 +43,7 @@ config :phoenix, :template_engines,
 
 config :duckduck,
   owner: "the-mikedavis",
-  repo: "doc_gen",
+  repo: "polarized",
   token_file: Path.join(File.cwd!(), ".goose_api_token")
 
 # Import environment specific config. This must remain at the bottom
