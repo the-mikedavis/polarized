@@ -20,7 +20,7 @@ defmodule PolarizedWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :index
-    post "/", PageController, :create
+    post "/suggest", SuggestionController, :suggest
     get "/stream/:id", ContentController, :stream
     get "/credits", PageController, :credits
     resources "/session", SessionController, only: [:new, :create]

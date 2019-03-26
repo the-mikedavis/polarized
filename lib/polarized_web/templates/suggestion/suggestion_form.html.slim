@@ -4,7 +4,7 @@ div.w-full.mt-6
     div.alert.alert-danger
       p Oops, something went wrong! Please check the errors below.
 
-  = form_for @changeset, Routes.page_path(@conn, :create), [class: "flex w-full bg-white px-8 pt-6 pb-8 mb-4"], fn f ->
+  = form_for @changeset, Routes.suggestion_path(@conn, :suggest), [class: "flex w-full bg-white px-8 pt-6 pb-8 mb-4"], fn f ->
     div class="w-1/2"
       = label(f, :name, "Twitter Handle", class: "inline text-black text-sm font-bold mr-2")
       div.inline-block.rounded.bg-grey-light
