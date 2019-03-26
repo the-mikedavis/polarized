@@ -33,7 +33,7 @@ html lang="en"
       p.alert.alert-danger role="alert" = get_flash(@conn, :error)
       = render(@view_module, @view_template, assigns)
 
-    nav.container.w-full role="navigation"
+    nav.container.w-full.pb-20 role="navigation"
       ul
         li = link("Credits", to: Routes.page_path(@conn, :credits))
         = if @conn.assigns[:current_user] do
