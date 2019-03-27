@@ -15,7 +15,7 @@ defmodule Polarized.Content do
   @spec create_handle(Changeset.t()) :: {:ok, %Handle{}} | {:error, :full | Changeset.t() | any()}
   def create_handle(changeset) do
     with {:ok, handle} <- Changeset.apply_action(changeset, :insert),
-         :ok <- Repo.insert_handle(handle) do
+         :ok <- Repo.follow_handle(handle) do
       {:ok, handle}
     else
       {:error, _reason} = e -> e

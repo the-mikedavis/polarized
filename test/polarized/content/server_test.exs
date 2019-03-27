@@ -14,8 +14,7 @@ defmodule Polarized.Content.ServerTest do
   setup do
     name = "FoxNewsSunday"
     handle = %Handle{name: name, right_wing: true}
-    :ok = Repo.insert_handle(handle)
-    :ok = Repo.follow_handle(handle.name)
+    :ok = Repo.follow_handle(handle)
 
     {tweets, _} =
       [File.cwd!(), "data", "foxnewssunday.exs"]

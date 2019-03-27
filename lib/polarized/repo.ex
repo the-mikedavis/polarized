@@ -16,17 +16,13 @@ defmodule Polarized.Repo do
   call(:upsert_user, &upsert_user_impl/1)
   call(:user_exists?, &user_exists_impl/1)
   call(:get_user, &get_user_impl/1)
-  call(:insert_handle, &insert_handle_impl/1)
-  call(:remove_handle, &remove_handle_impl/1)
   call(:follow_handle, &follow_handle_impl/1)
   call(:get_follow, &get_follow_impl/1)
   call(:unfollow_handle, &unfollow_handle_impl/1)
 
   def list_users, do: GenServer.call(__MODULE__, :list_users)
-  def list_handles, do: GenServer.call(__MODULE__, :list_handles)
   def list_follows, do: GenServer.call(__MODULE__, :list_follows)
   def handle_call(:list_users, _from, state), do: {:reply, list_users_impl(), state}
-  def handle_call(:list_handles, _from, state), do: {:reply, list_handles_impl(), state}
   def handle_call(:list_follows, _from, state), do: {:reply, list_follows_impl(), state}
 
   ## Server implementation
@@ -35,7 +31,6 @@ defmodule Polarized.Repo do
 
   @tables [
     {Admin, [:username, :password]},
-    {Polarized.Content.Handle, [:name, :right_wing]},
     {Follow, [:name, :right_wing]}
   ]
 
@@ -155,45 +150,7 @@ defmodule Polarized.Repo do
       end
     end
 
-    @spec list_handles_impl() :: {:ok, [%Handle{}]} | {:error, any()}
-    defp list_handles_impl do
-      case :mnesia.transaction(fn -> :mnesia.select(Handle, [{:_, [], [:"$_"]}]) end) do
-        {:atomic, handles} -> {:ok, Enum.map(handles, &into_handle/1)}
-        {:aborted, reason} -> {:error, reason}
-      end
-    end
-
     defp into_handle({_handle, name, lr}), do: %Handle{name: name, right_wing: lr}
-
-    @spec insert_handle_impl(%Handle{}) :: :ok | {:error, :full | any()}
-    defp insert_handle_impl(%Handle{} = handle) do
-      case :mnesia.transaction(insert_handle_transaction(handle)) do
-        {:atomic, :ok} -> :ok
-        {:atomic, {:error, :full}} -> {:error, :full}
-        {:aborted, reason} -> {:error, reason}
-      end
-    end
-
-    @max_handles 100
-
-    defp insert_handle_transaction(handle) do
-      fn ->
-        with handles when length(handles) < @max_handles <- :mnesia.all_keys(Handle),
-             :ok <- :mnesia.write({Handle, handle.name, handle.right_wing}) do
-          :ok
-        else
-          handles when is_list(handles) -> {:error, :full}
-        end
-      end
-    end
-
-    @spec remove_handle_impl(String.t()) :: {:ok, String.t()} | {:error, any()}
-    def remove_handle_impl(name) do
-      case :mnesia.transaction(fn -> :mnesia.delete({Handle, name}) end) do
-        {:atomic, :ok} -> {:ok, name}
-        {:aborted, reason} -> {:error, reason}
-      end
-    end
 
     @spec list_follows_impl() :: {:ok, [%Handle{}]} | {:error, any()}
     defp list_follows_impl do
@@ -203,20 +160,12 @@ defmodule Polarized.Repo do
       end
     end
 
-    @spec follow_handle_impl(String.t()) :: :ok | {:error, any()}
-    defp follow_handle_impl(name) do
-      follow = fn ->
-        with [{Handle, ^name, right_wing} | _] <- :mnesia.read({Handle, name}),
-             :ok <- :mnesia.delete({Handle, name}) do
-          :mnesia.write({Follow, name, right_wing})
-        else
-          [] -> {:error, :does_not_exist}
-        end
-      end
-
-      case :mnesia.transaction(follow) do
+    @spec follow_handle_impl(Handle.t()) :: :ok | {:error, any()}
+    defp follow_handle_impl(%Handle{} = handle) do
+      fn -> :mnesia.write({Follow, handle.name, handle.right_wing}) end
+      |> :mnesia.transaction()
+      |> case do
         {:atomic, :ok} -> :ok
-        {:atomic, {:error, :does_not_exist}} -> {:error, :does_not_exist}
         {:aborted, reason} -> {:error, reason}
       end
     end

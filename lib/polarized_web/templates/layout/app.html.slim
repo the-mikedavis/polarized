@@ -28,7 +28,7 @@ html lang="en"
         div.red-banner.bg-red.text-center
           a.text-white href='#{Routes.page_path(@conn, :index)}' POLARIZED.TV
 
-    main.pt-8.container role="main"
+    main.py-8.container role="main"
       p.alert.alert-info role="alert" = get_flash(@conn, :info)
       p.alert.alert-danger role="alert" = get_flash(@conn, :error)
       = render(@view_module, @view_template, assigns)
@@ -38,7 +38,7 @@ html lang="en"
         li = link("Credits", to: Routes.page_path(@conn, :credits))
         = if @conn.assigns[:current_user] do
           li = link("Admins", to: Routes.user_path(@conn, :index))
-          li = link("Suggestions", to: Routes.suggestion_path(@conn, :index))
+          li = link("Follows", to: Routes.suggestion_path(@conn, :index))
           li = link("Log out", to: Routes.session_path(@conn, :delete), method: "post")
         - else
           li = link("Log in", to: Routes.session_path(@conn, :new))

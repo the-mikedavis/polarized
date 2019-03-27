@@ -10,32 +10,12 @@ defmodule PolarizedWeb.SuggestionController do
   @content_server Application.get_env(:polarized, :content_server, ContentServer)
 
   def index(conn, _params) do
-    {:ok, handles} = Repo.list_handles()
     {:ok, follows} = Repo.list_follows()
 
-    suggestions = Enum.map(handles, fn %{name: name} = handle -> %{handle | id: name} end)
     follows = Enum.map(follows, fn %{name: name} = follow -> %{follow | id: name} end)
     changeset = Content.change_handle(%Handle{})
 
-    render(conn, "index.html", suggestions: suggestions, follows: follows, changeset: changeset)
-  end
-
-  def approve(conn, params) do
-    names = parse_batch(params)
-
-    Enum.each(names, &Repo.follow_handle/1)
-
-    Enum.each(names, &@content_server.add/1)
-
-    redirect(conn, to: Routes.suggestion_path(conn, :index))
-  end
-
-  def deny(conn, params) do
-    params
-    |> parse_batch()
-    |> Enum.each(&Repo.remove_handle/1)
-
-    redirect(conn, to: Routes.suggestion_path(conn, :index))
+    render(conn, "index.html", follows: follows, changeset: changeset)
   end
 
   def delete(conn, params) do
@@ -63,28 +43,17 @@ defmodule PolarizedWeb.SuggestionController do
     |> Handle.changeset()
     |> Content.create_handle()
     |> case do
-      {:ok, handle} ->
+      {:ok, _handle} ->
         conn
-        |> put_flash(:info, "You suggested #{handle.name}")
-        |> redirect(to: Routes.suggestion_path(conn, :index))
-
-      {:error, :full} ->
-        conn
-        |> put_flash(:error, "Could not suggest #{name} because the inbox is full!")
+        |> put_flash(:info, "You started following #{name}")
         |> redirect(to: Routes.suggestion_path(conn, :index))
 
       {:error, %Changeset{} = changeset} ->
-        {:ok, handles} = Repo.list_handles()
         {:ok, follows} = Repo.list_follows()
 
-        suggestions = Enum.map(handles, fn %{name: name} = handle -> %{handle | id: name} end)
         follows = Enum.map(follows, fn %{name: name} = follow -> %{follow | id: name} end)
 
-        render(conn, "index.html",
-          changeset: changeset,
-          suggestions: suggestions,
-          follows: follows
-        )
+        render(conn, "index.html", changeset: changeset, follows: follows)
     end
   end
 
