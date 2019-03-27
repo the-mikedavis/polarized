@@ -79,7 +79,7 @@ defmodule Polarized.Content.Server do
     {:noreply, Map.put(state, embed.id, embed)}
   end
 
-  def handle_cast(:refresh, state), do: {:noreply, fetch_state(state)}
+  def handle_cast(:refresh, _state), do: {:noreply, fetch_state()}
 
   def handle_cast({:add, handle}, state) do
     {:ok, %Handle{} = user} = Repo.get_follow(handle)
@@ -104,7 +104,7 @@ defmodule Polarized.Content.Server do
   end
 
   @impl GenServer
-  def handle_info(:refresh, state), do: {:noreply, fetch_state(state)}
+  def handle_info(:refresh, _state), do: {:noreply, fetch_state()}
 
   private do
     alias Polarized.Repo
@@ -112,6 +112,11 @@ defmodule Polarized.Content.Server do
     @spec fetch_state() :: state()
     defp fetch_state do
       {:ok, follows} = Repo.list_follows()
+
+      Content.download_dir()
+      |> Path.join("*")
+      |> Path.wildcard()
+      |> Enum.each(&File.rm!/1)
 
       state =
         follows
@@ -121,15 +126,6 @@ defmodule Polarized.Content.Server do
       for {_id, embed} <- state, do: enrich(embed)
 
       state
-    end
-
-    @spec fetch_state(state()) :: state()
-    defp fetch_state(prior_state) do
-      for {_id, embed} <- prior_state do
-        unless embed.dest == nil, do: :ok = File.rm!(embed.dest)
-      end
-
-      fetch_state()
     end
 
     @spec match_left_right(:_ | boolean(), %Embed{}) :: boolean()
