@@ -32,7 +32,7 @@ blocks:
                 git clone https://github.com/obmarg/libsysconfcpus.git;
                 cd libsysconfcpus;
                 ./configure --prefix=`pwd`;
-                make;
+                make && make install;
                 cd ..;
               fi
             - mv libsysconfcpus ..
@@ -88,9 +88,6 @@ blocks:
 
           - cache restore sysconfcpus
           - mv libsysconfcpus ../
-          - cd ../libsysconfcpus
-          - make install
-          - cd -
 
       jobs:
         - name: credo
