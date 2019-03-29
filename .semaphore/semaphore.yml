@@ -38,9 +38,11 @@ blocks:
             - mv libsysconfcpus ..
             - cache store sysconfcpus ../libsysconfcpus
 
-            - if [ ! -d ~/.asdf/shims/elm-make-old ]; then mv ~/.asdf/shims/elm-make ~/.asdf/shims/elm-make-old; fi
-            - printf "#\041/bin/bash\n\n~/libsysconfcpus/bin/sysconfcpus -n 2 elm-make-old \"\$@\"" > ~/.asdf/shims/elm-make
-            - chmod +x ~/.asdf/shims/elm-make
+            - rm ~/.asdf/shims/elm-make
+            - asdf reshim elm
+            - mv ~/.asdf/shims/elm-make ~/.asdf/shims/elm-make-old
+            - printf "#\041/bin/bash\n\necho \"Running elm-make with sysconfcpus -n 2\"\n\n~/libsysconfcpus/bin/sysconfcpus -n 2 elm-make-old \"\$@\"" > ~/.asdf/shims/elm-make
+            - chmod u+x ~/.asdf/shims/elm-make
 
             - cache delete asdf-$(checksum .tool-versions)
             - cache store asdf-$(checksum .tool-versions) ../.asdf
@@ -65,6 +67,11 @@ blocks:
             - yarn install
             - cache delete node-modules-$(checksum yarn.lock)
             - cache store node-modules-$(checksum yarn.lock) node_modules
+
+            - cache restore elm-stuff-$(checksum elm-package.json)
+            - elm-package install -y
+            - cache delete elm-stuff-$(checksum elm-package.json)
+            - cache store elm-stuff-$(checksum elm-package.json) elm-stuff
             - cd ..
 
   - name: test
@@ -106,5 +113,6 @@ blocks:
           commands:
             - cd assets
             - cache restore node-modules-$(checksum yarn.lock)
+            - cache restore elm-stuff-$(checksum elm-package.json)
             - ./node_modules/.bin/webpack -p
             - cd ..
