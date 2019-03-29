@@ -117,7 +117,7 @@ blocks:
 
 promotions:
   - name: Upload release artifact
-    pipline_file: upload_release.yml
+    pipeline_file: upload_release.yml
     auto_promote_on:
       - result: passed
         branch:
