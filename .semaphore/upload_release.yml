@@ -31,7 +31,7 @@ blocks:
 
             - mix release --env=prod
             - mix phx.digest
-            - mix goose $SEMAPHORE_GIT_BRANCH --yes
+            - mix goose --yes
       secrets:
         - name: goose-api-token
       env_vars:
