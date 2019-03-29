@@ -35,7 +35,8 @@ blocks:
                 make;
                 cd ..;
               fi
-            - cache store sysconfcpus libsysconfcpus
+            - mv libsysconfcpus ..
+            - cache store sysconfcpus ../libsysconfcpus
 
             - if [ ! -d ~/.asdf/shims/elm-make-old ]; then mv ~/.asdf/shims/elm-make ~/.asdf/shims/elm-make-old; fi
             - printf "#\041/bin/bash\n\n~/libsysconfcpus/bin/sysconfcpus -n 2 elm-make-old \"\$@\"" > ~/.asdf/shims/elm-make
@@ -79,9 +80,9 @@ blocks:
           - cache restore mix-build-$SEMAPHORE_GIT_BRANCH
 
           - cache restore sysconfcpus
-          - cd libsysconfcpus
+          - cd ../libsysconfcpus
           - make install
-          - cd ..
+          - cd -
 
       jobs:
         - name: credo
