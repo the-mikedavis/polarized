@@ -113,3 +113,12 @@ blocks:
             - cache restore elm-stuff-$(checksum elm-package.json)
             - ./node_modules/.bin/webpack -p
             - cd ..
+
+
+promotions:
+  - name: Upload release artifact
+    pipline_file: upload_release.yml
+    auto_promote_on:
+      - result: passed
+        branch:
+          - /^v[\d.]+/
