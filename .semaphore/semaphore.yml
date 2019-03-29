@@ -1,45 +1,72 @@
 name: Polarized
+version: v1.0
 
 agent:
   machine:
     type: e1-standard-2
-    os_image: ubuntu1604
+    os_image: ubuntu1804
 
-block:
-  - name: All
-    prologue:
-      commands:
-        - checkout
+blocks:
+  - name: setup
+    task:
+      jobs:
+        - name: install asdf and mix dependencies
+          commands:
+            - checkout
 
-        - cache restore asdf-$(checksum .tool-versions)
-        - "if [ ! -d ~/.asdf ] ; then git clone --single-branch --branch v0.6.3 https://github.com/asdf-vm/asdf.git; fi"
-        - . ~/.asdf/asdf.sh
-        - if ! asdf plugin-list | grep erlang; then asdf plugin-add erlang; fi
-        - if ! asdf plugin-list | grep elixir; then asdf plugin-add elixir; fi
-        - asdf install
-        - cache store asdf-$(checksum .tool-versions) ~/.asdf
+            - install-package openssl libssl-dev g++ make unzip zip libffi-dev automake autoconf inotify-tools
+            - cache restore asdf-$(checksum .tool-versions)
+            - mv .asdf ~
+            - "if [ ! -d ~/.asdf ] ; then git clone --single-branch --branch v0.6.3 https://github.com/asdf-vm/asdf.git ~/.asdf; fi"
+            - . ~/.asdf/asdf.sh
+            - if ! asdf plugin-list | grep erlang; then asdf plugin-add erlang; fi
+            - if ! asdf plugin-list | grep elixir; then asdf plugin-add elixir; fi
+            - if ! asdf plugin-list | grep nodejs; then asdf plugin-add nodejs; bash ~/.asdf/plugins/nodejs/bin/import-release-team-keyring; fi
+            - if ! asdf plugin-list | grep elm; then asdf plugin-add elm; fi
+            - asdf install
+            - cache delete asdf-$(checksum .tool-versions)
+            - cache store asdf-$(checksum .tool-versions) ../.asdf
 
-        - cache restore mix-deps-$(checksum mix.lock)
-        - cache restore mix-build-$SEMAPHORE_GIT_BRANCH,mix-build-master
+            - cache restore mix-deps-$(checksum mix.lock)
+            - cache restore mix-build-$SEMAPHORE_GIT_BRANCH,mix-build-master
 
-        - mix local.hex --force
-        - mix local.rebar --force
-        - mix do deps.get, deps.compile
-        - MIX_ENV=test mix compile
+            - mix local.hex --force
+            - mix local.rebar --force
+            - MIX_ENV=test mix do deps.get, deps.compile
+            - MIX_ENV=test mix compile
+            - MIX_ENV=test mix dialyzer --plt
 
-    jobs:
-      - name: credo
+            - cache delete mix-deps-$(checksum mix.lock)
+            - cache store mix-deps-$(checksum mix.lock) deps
+
+            - cache delete mix-build-$SEMAPHORE_GIT_BRANCH
+            - cache store mix-build-$SEMAPHORE_GIT_BRANCH _build
+
+  - name: test
+    task:
+      prologue:
         commands:
-          - mix credo
+          - checkout
 
-      - name: compile
-        commands:
-          - MIX_ENV=test mix compile --force --warnings-as-errors
+          - cache restore asdf-$(checksum .tool-versions)
+          - mv .asdf ~
+          - . ~/.asdf/asdf.sh
+          - cache restore mix-deps-$(checksum mix.lock)
+          - cache restore mix-build-$SEMAPHORE_GIT_BRANCH
 
-      - name: formatter
-        commands:
-          - mix format --check-formatted
+      jobs:
+        - name: credo
+          commands:
+            - mix credo
 
-      - name: coveralls
-        commands:
-          - mix coveralls.semaphore
+        - name: compile
+          commands:
+            - MIX_ENV=test mix compile --force --warnings-as-errors
+
+        - name: formatter
+          commands:
+            - mix format --check-formatted
+
+        - name: coveralls
+          commands:
+            - mix coveralls
