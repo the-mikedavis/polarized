@@ -37,7 +37,7 @@ blocks:
               fi
             - cache store sysconfcpus libsysconfcpus
 
-            - if [ ! -d ~/.asdf/shims/elm-make-old]; then mv ~/.asdf/shims/elm-make ~/.asdf/shims/elm-make-old; fi
+            - if [ ! -d ~/.asdf/shims/elm-make-old ]; then mv ~/.asdf/shims/elm-make ~/.asdf/shims/elm-make-old; fi
             - printf "#\041/bin/bash\n\n~/libsysconfcpus/bin/sysconfcpus -n 2 elm-make-old \"\$@\"" > ~/.asdf/shims/elm-make
             - chmod +x ~/.asdf/shims/elm-make
 
