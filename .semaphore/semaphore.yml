@@ -1,0 +1,45 @@
+name: Polarized
+
+agent:
+  machine:
+    type: e1-standard-2
+    os_image: ubuntu1604
+
+block:
+  - name: All
+    prologue:
+      commands:
+        - checkout
+
+        - cache restore asdf-$(checksum .tool-versions)
+        - "if [ ! -d ~/.asdf ] ; then git clone --single-branch --branch v0.6.3 https://github.com/asdf-vm/asdf.git; fi"
+        - . ~/.asdf/asdf.sh
+        - if ! asdf plugin-list | grep erlang; then asdf plugin-add erlang; fi
+        - if ! asdf plugin-list | grep elixir; then asdf plugin-add elixir; fi
+        - asdf install
+        - cache store asdf-$(checksum .tool-versions) ~/.asdf
+
+        - cache restore mix-deps-$(checksum mix.lock)
+        - cache restore mix-build-$SEMAPHORE_GIT_BRANCH,mix-build-master
+
+        - mix local.hex --force
+        - mix local.rebar --force
+        - mix do deps.get, deps.compile
+        - MIX_ENV=test mix compile
+
+    jobs:
+      - name: credo
+        commands:
+          - mix credo
+
+      - name: compile
+        commands:
+          - MIX_ENV=test mix compile --force --warnings-as-errors
+
+      - name: formatter
+        commands:
+          - mix format --check-formatted
+
+      - name: coveralls
+        commands:
+          - mix coveralls.semaphore
