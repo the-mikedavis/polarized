@@ -59,8 +59,8 @@ blocks:
             - cache delete mix-build-$SEMAPHORE_GIT_BRANCH
             - cache store mix-build-$SEMAPHORE_GIT_BRANCH _build
 
-            - cache restore node-modules-$(checksum yarn.lock)
             - cd assets
+            - cache restore node-modules-$(checksum yarn.lock)
             - yarn install
             - cache delete node-modules-$(checksum yarn.lock)
             - cache store node-modules-$(checksum yarn.lock) node_modules
