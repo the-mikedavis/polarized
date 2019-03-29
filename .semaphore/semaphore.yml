@@ -14,7 +14,7 @@ blocks:
           commands:
             - checkout
 
-            - install-package openssl libssl-dev g++ make unzip zip libffi-dev automake autoconf inotify-tools
+            - install-package openssl libssl-dev g++ make unzip zip libffi-dev automake autoconf inotify-tools yarn
             - cache restore asdf-$(checksum .tool-versions)
             - mv .asdf ~
             - "if [ ! -d ~/.asdf ] ; then git clone --single-branch --branch v0.6.3 https://github.com/asdf-vm/asdf.git ~/.asdf; fi"
@@ -41,6 +41,13 @@ blocks:
 
             - cache delete mix-build-$SEMAPHORE_GIT_BRANCH
             - cache store mix-build-$SEMAPHORE_GIT_BRANCH _build
+
+            - cache restore node-modules-$(checksum yarn.lock)
+            - cd assets
+            - yarn install
+            - cache delete node-modules-$(checksum yarn.lock)
+            - cache store node-modules-$(checksum yarn.lock) node_modules
+            - cd ..
 
   - name: test
     task:
@@ -70,3 +77,10 @@ blocks:
         - name: coveralls
           commands:
             - mix coveralls
+
+        - name: build assets
+          commands:
+            - cd assets
+            - cache restore node-modules-$(checksum yarn.lock)
+            - ./node_modules/.bin/webpack -p
+            - cd ..
