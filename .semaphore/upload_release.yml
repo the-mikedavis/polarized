@@ -23,6 +23,9 @@ blocks:
             - cache restore mix-deps-$(checksum mix.lock)
             - cache restore mix-build-$SEMAPHORE_GIT_BRANCH
 
+            - mix local.hex --force
+            - mix local.rebar --force
+
             - cd assets
             - cache restore node-modules-$(checksum yarn.lock)
             - cache restore elm-stuff-$(checksum elm-package.json)
