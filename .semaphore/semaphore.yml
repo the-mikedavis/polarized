@@ -96,7 +96,7 @@ blocks:
 
         - name: compile
           commands:
-            - MIX_ENV=test mix compile --force --warnings-as-errors
+            - mix compile --force --warnings-as-errors
 
         - name: formatter
           commands:
@@ -111,8 +111,11 @@ blocks:
             - cd assets
             - cache restore node-modules-$(checksum yarn.lock)
             - cache restore elm-stuff-$(checksum elm-package.json)
-            - ./node_modules/.bin/webpack -p
+            - ./node_modules/.bin/webpack --production
             - cd ..
+      env_vars:
+        - name: MIX_ENV
+          value: test
 
 
 promotions:

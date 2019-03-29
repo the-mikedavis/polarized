@@ -26,9 +26,14 @@ blocks:
             - cd assets
             - cache restore node-modules-$(checksum yarn.lock)
             - cache restore elm-stuff-$(checksum elm-package.json)
-            - ./node_modules/.bin/webpack -p
+            - ./node_modules/.bin/webpack --production
             - cd ..
 
-            - MIX_ENV=prod mix release --env=prod
-            - MIX_ENV=prod mix phx.digest
-            - MIX_ENV=prod mix goose --yes
+            - mix release --env=prod
+            - mix phx.digest
+            - mix goose $SEMAPHORE_GIT_BRANCH --yes
+      secrets:
+        - name: goose-api-token
+      env_vars:
+        - name: MIX_ENV
+          value: prod
