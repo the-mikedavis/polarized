@@ -32,10 +32,10 @@ blocks:
                 git clone https://github.com/obmarg/libsysconfcpus.git;
                 cd libsysconfcpus;
                 ./configure --prefix=`pwd`;
-                make && make install;
+                make;
                 cd ..;
               fi
-            - cache store sysconfcpus sysconfcpus
+            - cache store sysconfcpus libsysconfcpus
 
             - mv ~/.asdf/shims/elm-make ~/.asdf/shims/elm-make-old
             - printf "#\041/bin/bash\n\necho \"Running elm-make with sysconfcpus -n 2\"\n\$SEMAPHORE_BUILD_DIR/sysconfcpus/bin/sysconfcpus -n 2 elm-make-old \"\$@\"" > ~/.asdf/shims/elm-make
@@ -77,6 +77,11 @@ blocks:
           - . ~/.asdf/asdf.sh
           - cache restore mix-deps-$(checksum mix.lock)
           - cache restore mix-build-$SEMAPHORE_GIT_BRANCH
+
+          - cache restore sysconfcpus
+          - cd libsysconfcpus
+          - make install
+          - cd ..
 
       jobs:
         - name: credo
