@@ -37,8 +37,8 @@ blocks:
               fi
             - cache store sysconfcpus libsysconfcpus
 
-            - mv ~/.asdf/shims/elm-make ~/.asdf/shims/elm-make-old
-            - printf "#\041/bin/bash\n\necho \"Running elm-make with sysconfcpus -n 2\"\n\$SEMAPHORE_BUILD_DIR/sysconfcpus/bin/sysconfcpus -n 2 elm-make-old \"\$@\"" > ~/.asdf/shims/elm-make
+            - if [ ! -d ~/.asdf/shims/elm-make-old]; then mv ~/.asdf/shims/elm-make ~/.asdf/shims/elm-make-old; fi
+            - printf "#\041/bin/bash\n\n~/libsysconfcpus/bin/sysconfcpus -n 2 elm-make-old \"\$@\"" > ~/.asdf/shims/elm-make
             - chmod +x ~/.asdf/shims/elm-make
 
             - cache delete asdf-$(checksum .tool-versions)
