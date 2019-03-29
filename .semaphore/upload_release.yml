@@ -1,0 +1,42 @@
+version: v1.0
+name: Upload the release artifact
+agent:
+  machine:
+    type: e1-standard-2
+    os_image: ubuntu1804
+blocks:
+  - name: upload release artifact
+    task:
+      jobs:
+        - name: Goose the release artifact
+          commands:
+            - checkout
+
+            - cache restore asdf-$(checksum .tool-versions)
+            - mv .asdf ~
+
+            - cache restore sysconfcpus
+            - mv libsysconfcpus ../
+
+            - . ~/.asdf/asdf.sh
+
+            - cache restore mix-deps-$(checksum mix.lock)
+            - cache restore mix-build-$SEMAPHORE_GIT_BRANCH
+
+            - mix local.hex --force
+            - mix local.rebar --force
+
+            - cd assets
+            - cache restore node-modules-$(checksum yarn.lock)
+            - cache restore elm-stuff-$(checksum elm-package.json)
+            - ./node_modules/.bin/webpack --production
+            - cd ..
+
+            - mix release --env=prod
+            - mix phx.digest
+            - mix goose --yes
+      secrets:
+        - name: goose-api-token
+      env_vars:
+        - name: MIX_ENV
+          value: prod

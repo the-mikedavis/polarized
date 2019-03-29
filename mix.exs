@@ -18,6 +18,7 @@ defmodule Polarized.MixProject do
         "coveralls.detail": :test,
         "coveralls.post": :test,
         "coveralls.html": :test,
+        "coveralls.semaphore": :test,
         credo: :test,
         "test.watch": :test,
         dialyzer: :test,
@@ -78,7 +79,7 @@ defmodule Polarized.MixProject do
 
       # test
       {:credo, "~> 0.9.1", only: [:dev, :test], runtime: false},
-      {:excoveralls, "~> 0.7", only: :test},
+      {:excoveralls, "~> 0.10", only: :test},
       {:dialyxir, "~> 1.0.0-rc.4", only: [:dev, :test], runtime: false},
       {:private, "~> 0.1.1"},
       {:mox, "~> 0.5"},

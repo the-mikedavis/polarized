@@ -22,6 +22,8 @@ defmodule Polarized.Repo do
 
   def list_users, do: GenServer.call(__MODULE__, :list_users)
   def list_follows, do: GenServer.call(__MODULE__, :list_follows)
+
+  @impl GenServer
   def handle_call(:list_users, _from, state), do: {:reply, list_users_impl(), state}
   def handle_call(:list_follows, _from, state), do: {:reply, list_follows_impl(), state}
 
